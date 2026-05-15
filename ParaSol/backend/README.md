@@ -253,6 +253,16 @@ INFO - Rainfall calculation completed
 
 ---
 
+# Datos que ofrece el Backend
+
+| campo | qué es |
+|---|---|
+| `total_rainfall_mm` | cuánto llovió en todo el período |
+| `avg_daily_rainfall_mm` | promedio por día en ese período |
+| `period` | el rango de fechas consultado |
+| `series` | el detalle día a día |
+
+
 # Estado Actual del Proyecto
 
 Actualmente implementado:

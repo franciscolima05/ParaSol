@@ -10,34 +10,58 @@ def check_rainfall_service(data):
     polygon = ee.Geometry.Polygon(data.coordinates)
 
     chirps = get_chirps_collection(
-        start_date="2024-01-01",
-        end_date="2024-12-31"
+        start_date=data.start_date,
+        end_date=data.end_date
     )
 
-    rainfall = (
-        chirps
-        .select("precipitation")
-        .sum()
-    )
+    def extract_daily(image):
+        date = image.date().format("YYYY-MM-dd")
+        stats = image.select("precipitation").reduceRegion(
+            reducer=ee.Reducer.mean(),
+            geometry=polygon,
+            scale=5000, 
+            maxPixels=1e9
+        )
+        return ee.Feature(None, {
+            "date": date,
+            "precipitation": stats.get("precipitation")
+        })
 
-    stats = rainfall.reduceRegion(
-        reducer=ee.Reducer.mean(),
-        geometry=polygon,
-        scale=5000,
-        maxPixels=1e9
-    )
+    daily_features = chirps.map(extract_daily)
+    result = daily_features.getInfo()
 
-    result = stats.getInfo()
-    rainfall_mm=result.get("precipitation")
-    logger.info("lluvia acumulada: %s mm", rainfall_mm)
+    # cuánto llovió cada día específico
+    series = [
+        {
+            "date": f["properties"]["date"],
+            "precipitation_mm": f["properties"]["precipitation"]
+        }
+        for f in result["features"]
+    ]
 
+    # filtrás una sola vez
+    valid_days = [
+        day["precipitation_mm"] for day in series 
+        if day["precipitation_mm"] is not None
+    ]
+
+    # cuánto llovió en total
+    total_rainfall_mm = sum(valid_days)
+
+    # cuánto llovió en promedio por día
+    avg_daily_rainfall_mm = sum(valid_days) / len(valid_days)
+
+
+    logger.info("serie diaria calculada: %s días", len(series))
     logger.info("calculo de lluvia completado")
 
     return {
-           "rainfall_mm": rainfall_mm,
-           "unit": "mm",
-           "period": {
-               "start": "2024-01-01",
-               "end": "2024-12-31"
-           }
-       }
+        "total_rainfall_mm": total_rainfall_mm,
+        "avg_daily_rainfall_mm": avg_daily_rainfall_mm,
+        "unit": "mm",
+        "period": {
+            "start": data.start_date,
+            "end": data.end_date
+        },
+        "series": series
+    } 
