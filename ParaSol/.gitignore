@@ -43,3 +43,7 @@ contracts/.openzeppelin/unknown-*.json
 # Subgraph
 subgraph/build/
 subgraph/generated/
+
+# Python
+__pycache__/
+*.py[cod]
