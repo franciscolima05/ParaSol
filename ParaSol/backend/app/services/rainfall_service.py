@@ -57,7 +57,6 @@ def check_rainfall_service(data):
 
     return {
         "total_rainfall_mm": total_rainfall_mm,
-        "avg_daily_rainfall_mm": avg_daily_rainfall_mm,
         "unit": "mm",
         "period": {
             "start": data.start_date,
