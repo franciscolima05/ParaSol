@@ -2,12 +2,12 @@
 pragma solidity ^0.8.20;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/access/AccessControl.sol";
 
-contract ParaSolPool is Ownable {
+contract ParaSolPool is AccessControl{
     IERC20 public usdcToken;
-    
-    address public engineContract;
+    bytes32 public constant ADMIN_ROLE = keccak256("ADMIN_ROLE");
+    bytes32 public constant ENGINE_ROLE = keccak256("ENGINE_ROLE");
     struct PoolData {
         string name;
         uint256 total_capital;
@@ -24,19 +24,14 @@ contract ParaSolPool is Ownable {
     event CapitalLocked(uint256 indexed poolId, uint256 amount);
     event PayoutExecuted(uint256 indexed poolId, address to, uint256 amount);
 
-    modifier onlyEngine() {
-        require(msg.sender == engineContract, "Solo el Engine puede ejecutar pagos");
-        _;
-    }
-
-    constructor(address _usdcAddress, address initialOwner) Ownable(initialOwner) {
+    constructor(address _usdcAddress, address initialAdmin) {
         usdcToken = IERC20(_usdcAddress);
+        _grantRole(DEFAULT_ADMIN_ROLE, initialAdmin);
+        _grantRole(ADMIN_ROLE, initialAdmin);
     }
 
-    function setEngineContract(address _engine) external onlyOwner {
-        engineContract = _engine;
-    }
-    function createPool(string memory _name) external onlyOwner returns (uint256) {
+    //
+    function createPool(string memory _name) external onlyRole(ADMIN_ROLE) returns (uint256) {
         uint256 poolId = nextPoolId++;
         pools[poolId] = PoolData({
             name: _name,
@@ -57,7 +52,7 @@ contract ParaSolPool is Ownable {
     }
 
     function lockCapital(uint256 poolId, uint256 amount) external {
-        require(msg.sender == engineContract || msg.sender == owner(), "No autorizado");
+        require(hasRole(ENGINE_ROLE, msg.sender) || hasRole(ADMIN_ROLE, msg.sender), "No autorizado");
         require(pools[poolId].isActive, "Pool inactivo");
         
         uint256 available = pools[poolId].total_capital - pools[poolId].locked_capital;
@@ -68,7 +63,7 @@ contract ParaSolPool is Ownable {
     }
 
     //el pago escalonado lo defino en el core principal
-    function executePayout(uint256 poolId, address farmerAddress, uint256 payoutAmount) external onlyEngine {
+    function executePayout(uint256 poolId, address farmerAddress, uint256 payoutAmount) external onlyRole(ENGINE_ROLE) {
         PoolData storage pool = pools[poolId];
         require(pool.isActive, "Pool inactivo");
         require(pool.locked_capital >= payoutAmount, "El Payout supero el capital bloqueado");
