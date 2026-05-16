@@ -4,22 +4,25 @@ Backend geoespacial para análisis climático y seguros paramétricos agrícolas
 
 ---
 
-# Objetivo
+## Objetivo
 
-El backend procesa información geoespacial y satelital para detectar eventos climáticos que puedan activar seguros paramétricos automáticos.
+El backend procesa información geoespacial y satelital para detectar eventos climáticos que puedan activar seguros paramétricos automáticos sobre la red Avalanche.
 
-Actualmente el sistema permite:
+El sistema permite:
 
-* recibir polígonos geográficos
-* consultar datasets satelitales desde Google Earth Engine
-* calcular lluvia acumulada y serie diaria de precipitación
-* calcular TWI (Topographic Wetness Index) para detectar zonas vulnerables a anegamiento
-* obtener estadísticas climáticas sobre una región
-* exponer endpoints HTTP mediante FastAPI
+- recibir polígonos geográficos de parcelas agrícolas
+- consultar datasets satelitales desde Google Earth Engine
+- calcular lluvia acumulada y serie diaria de precipitación (CHIRPS)
+- calcular TWI (Topographic Wetness Index) para detectar zonas vulnerables a anegamiento
+- detectar inundaciones reales con Sentinel-1 SAR (pre vs post evento)
+- calcular NDVI (Sentinel-2) para evaluar daño en vegetación
+- exponer endpoints HTTP mediante FastAPI
+- persistir datos de pólizas, eventos paramétricos y pagos en PostgreSQL/PostGIS
+- escuchar eventos on-chain del smart contract para sincronizar la base de datos
 
 ---
 
-# Arquitectura Actual
+## Arquitectura
 
 ```text
 Client
@@ -28,62 +31,111 @@ FastAPI API
    ↓
 Services Layer
    ↓
-Providers Layer
+Providers Layer          Repositories Layer
+   ↓                            ↓
+Google Earth Engine       PostgreSQL / PostGIS
    ↓
-Google Earth Engine
-   ↓
-CHIRPS Dataset / SRTM DEM
+CHIRPS / SRTM / Sentinel-1 / Sentinel-2
 ```
 
 ---
 
-# Stack Tecnológico
+## Stack Tecnológico
 
-| Componente          | Tecnología          |
-| ------------------- | ------------------- |
-| API                 | FastAPI             |
-| Geoprocesamiento    | Google Earth Engine |
-| Lenguaje            | Python 3.14         |
-| Validación de datos | Pydantic            |
-| Logging             | logging             |
-| Dataset climático   | CHIRPS Daily        |
-| Dataset topográfico | USGS SRTM GL1 003   |
+| Componente           | Tecnología                    |
+| -------------------- | ----------------------------- |
+| API                  | FastAPI                       |
+| Geoprocesamiento     | Google Earth Engine           |
+| Lenguaje             | Python 3.14                   |
+| Validación de datos  | Pydantic                      |
+| Base de datos        | PostgreSQL + PostGIS          |
+| ORM                  | SQLAlchemy + GeoAlchemy2      |
+| Blockchain           | Web3.py + Avalanche Fuji      |
+| Logging              | logging                       |
+| Dataset climático    | CHIRPS Daily                  |
+| Dataset topográfico  | USGS SRTM GL1 003             |
+| Dataset SAR          | Copernicus Sentinel-1 GRD     |
+| Dataset vegetación   | Copernicus Sentinel-2 SR      |
 
 ---
 
-# Estructura del Proyecto
+## Estructura del Proyecto
 
 ```text
-app/
-├── api/
-│   └── routes/
-│       └── analysis.py
+backend/
+├── app/
+│   ├── api/
+│   │   └── routes/
+│   │       └── analysis.py
+│   │
+│   ├── core/
+│   │   ├── earth_engine.py
+│   │   └── logger.py
+│   │
+│   ├── providers/
+│   │   ├── chirps_provider.py
+│   │   ├── dem_provider.py
+│   │   └── sentinel1_provider.py
+│   │
+│   ├── schemas/
+│   │   ├── rainfall.py
+│   │   └── sentinel.py
+│   │
+│   ├── services/
+│   │   ├── rainfall_service.py
+│   │   ├── twi_service.py
+│   │   ├── flood_service.py
+│   │   ├── flood_debug_service.py
+│   │   └── ndvi_service.py
+│   │
+│   └── main.py
 │
-├── core/
-│   ├── earth_engine.py
-│   └── logger.py
-│
-├── providers/
-│   ├── chirps_provider.py
-│   └── dem_provider.py
-│
-├── schemas/
-│   └── rainfall.py
-│
-├── services/
-│   ├── rainfall_service.py
-│   └── twi_service.py
-│
-└── main.py
+└── src/
+    ├── database.py
+    │
+    ├── models/
+    │   ├── __init__.py
+    │   ├── User.py
+    │   ├── Field.py
+    │   ├── Policy.py
+    │   ├── PolicyPayout.py
+    │   ├── LiquidityPool.py
+    │   └── ParametricEvent.py
+    │
+    ├── repositories/
+    │   ├── __init__.py
+    │   ├── userRepository.py
+    │   ├── fieldRepository.py
+    │   ├── policyRepository.py
+    │   ├── policyPayoutRepository.py
+    │   ├── liquidityPoolRepository.py
+    │   └── parametricEventRepository.py
+    │
+    └── services/
+        ├── userService.py
+        ├── fieldService.py
+        ├── policyService.py
+        ├── parametricService.py
+        ├── poolService.py
+        ├── oracleService.py
+        └── blockchain/
+            ├── client.py
+            ├── events.py
+            ├── engine_contracts.py
+            └── pool_contract.py
 ```
 
 ---
 
-# Explicación de Carpetas
+## Explicación de Capas
 
-## api/routes
+### app/ — Capa Geoespacial
 
-Contiene los endpoints HTTP del sistema.
+Contiene toda la lógica de análisis satelital. Es la capa que interactúa con Google Earth Engine.
+
+#### app/api/routes
+
+Endpoints HTTP del sistema. Reciben requests, validan entrada y delegan a services.
 
 Endpoints actuales:
 
@@ -91,241 +143,240 @@ Endpoints actuales:
 POST /rainfall/check
 POST /analysis/twi
 POST /analysis/flood
+POST /analysis/flood/debug
+POST /analysis/ndvi
 ```
 
-Responsabilidades:
-
-* recibir requests
-* validar entrada
-* delegar lógica a services
-
----
-
-## core
+#### app/core
 
 Infraestructura global del backend.
 
-### earth_engine.py
+- `earth_engine.py` — inicializa y mantiene la sesión con Google Earth Engine
+- `logger.py` — configuración centralizada de logs
 
-Inicializa Google Earth Engine.
+#### app/providers
 
-### logger.py
+Capa de acceso a datasets satelitales. Abstrae Earth Engine para que los services no dependan del dataset específico.
 
-Configuración centralizada de logs.
+- `chirps_provider.py` — CHIRPS Daily (precipitación)
+- `dem_provider.py` — USGS SRTM GL1 003 (topografía)
+- `sentinel1_provider.py` — Copernicus S1 GRD (SAR, detección de inundación)
 
----
+#### app/schemas
 
-## providers
+Modelos Pydantic para validación de requests y responses.
 
-Capa de acceso a fuentes externas.
+#### app/services
 
-Actualmente:
+Lógica de negocio geoespacial y procesamiento satelital.
 
-* CHIRPS rainfall dataset
-* USGS SRTM DEM
-* Sentinel-1 GRD (SAR)
-
-Responsabilidad:
-
-* consultar datasets
-* abstraer Earth Engine
-
-Esto permite cambiar datasets sin romper services.
+- `rainfall_service.py` — lluvia acumulada, serie diaria, estadísticas espaciales CHIRPS
+- `twi_service.py` — TWI desde DEM SRTM para detección de zonas vulnerables
+- `flood_service.py` — detección de anegamiento con Sentinel-1 SAR (pre vs post evento)
+- `flood_debug_service.py` — diagnóstico de cobertura de escenas Sentinel-1
+- `ndvi_service.py` — NDVI desde Sentinel-2, clasificación vegetativa
 
 ---
 
-## schemas
+### src/ — Capa de Dominio y Persistencia
 
-Modelos Pydantic utilizados para validar requests.
+Contiene los modelos de negocio, repositorios de base de datos y la integración con la blockchain.
 
-```python
-class RainfallRequest(BaseModel):
-    coordinates: list
-    start_date: str
-    end_date: str
+#### src/database.py
+
+Configuración de SQLAlchemy con PostgreSQL/PostGIS. Expone `session_scope()` como context manager para gestión de transacciones.
+
+#### src/models/
+
+Modelos SQLAlchemy que representan las entidades del dominio.
+
+| Modelo            | Descripción                                                         |
+| ----------------- | ------------------------------------------------------------------- |
+| `User`            | Agricultor con smart account ERC-4337. No necesita entender crypto. |
+| `Field`           | Parcela agrícola con geometría PostGIS y `polygon_hash` anti-fraude |
+| `Policy`          | Póliza paramétrica materializada como NFT ERC-721 en Avalanche      |
+| `PolicyPayout`    | Tramo de pago escalonado (leve 25% / moderado 50% / severo 75%)     |
+| `LiquidityPool`   | Pool de capital USDC que respalda las pólizas on-chain              |
+| `ParametricEvent` | Evento climático detectado por el motor, firmado por el oráculo     |
+
+#### src/repositories/
+
+Capa de acceso a datos. Cada módulo expone funciones puras que reciben una `Session` y operan sobre un único modelo. La gestión de transacciones queda en manos del caller.
+
+#### src/services/
+
+Lógica de negocio de dominio: creación de usuarios, pólizas, eventos paramétricos, gestión de pools.
+
+#### src/services/blockchain/
+
+Integración con Avalanche Fuji.
+
+- `client.py` — singleton Web3, firma y difusión de transacciones
+- `events.py` — listener de eventos on-chain (polling de bloques en thread daemon)
+- `engine_contracts.py` — wrappers de `ParaSolPolicy.sol` y `ParaSolEngine.sol`
+- `pool_contract.py` — wrapper de `ParaSolPool.sol`
+
+---
+
+## Sincronización On-Chain
+
+El backend implementa un sistema de **event listening** para sincronizar la base de datos con el estado real del smart contract.
+
+### Flujo
+
+```text
+Smart Contract deployado
+        ↓
+emite Transfer(from=0x0, tokenId, holder)   ← mint de la póliza NFT
+        ↓
+backend escucha con web3.py (polling cada 3s)
+        ↓
+policyService.on_policy_minted()
+        ↓
+llena nft_token_id + mint_tx_hash + block_number en DB
+policy.status → ACTIVE
 ```
 
----
+### Activación
 
-## services
+El listener se activa automáticamente al startup si `POLICY_CONTRACT_ADDRESS` está configurado en el entorno. Si no está configurado (contrato aún no deployado), el backend funciona normalmente sin el listener.
 
-Contiene la lógica de negocio y procesamiento geoespacial.
+```python
+# app/main.py
+@app.on_event("startup")
+def startup_event():
+    init_ee()
+    if os.getenv("POLICY_CONTRACT_ADDRESS"):
+        start_blockchain_listeners()
+```
 
-### rainfall_service.py
-
-Responsabilidades:
-
-* construir polígonos GIS
-* consultar CHIRPS dataset
-* calcular lluvia acumulada total
-* calcular promedio diario de precipitación
-* generar serie diaria de precipitación
-
-### twi_service.py
-
-Responsabilidades:
-
-* construir polígonos GIS
-* consultar DEM (SRTM 30m)
-* calcular pendiente en radianes
-* calcular TWI sobre el polígono
-* retornar promedio y máximo de TWI
-
-### flood_service.py
-
-Responsabilidades:
-
-* construir polígonos GIS
-* consultar Sentinel-1 GRD (VV, IW, 10m) en una ventana pre y otra post evento
-* aplicar speckle filter (focal_median) sobre el composite mediana de cada ventana
-* aplicar umbral de backscatter en dB para clasificar agua
-* calcular % de área inundada en el post-evento
-* calcular % de área NUEVA inundada (cambio neto pre → post)
-* devolver delta de backscatter VV en dB
+Esto permite desarrollar y testear el backend sin depender del contrato deployado.
 
 ---
 
-## main.py
+## Campos On-Chain y Ciclo de Vida
 
-Punto de entrada principal del backend.
+Los campos on-chain de `Policy` y `PolicyPayout` comienzan en `NULL` y se llenan a medida que avanza el ciclo de vida. El `status` siempre indica en qué etapa está cada objeto.
 
-Responsabilidades:
+### Policy
 
-* crear aplicación FastAPI
-* registrar routers
-* cargar inicialización global
+```text
+QUOTED → PENDING_PAYMENT → ACTIVE → PARTIAL_PAID → SETTLED
+                                  ↘ UNDER_REVIEW ↗
+```
+
+| Campo                 | Cuándo se llena                          |
+| --------------------- | ---------------------------------------- |
+| `nft_contract_address`| al configurar `POLICY_CONTRACT_ADDRESS`  |
+| `nft_token_id`        | al confirmar el mint on-chain            |
+| `mint_tx_hash`        | al confirmar el mint on-chain            |
+| `activated_at`        | junto con el mint                        |
+
+### PolicyPayout
+
+```text
+PENDING → SUBMITTED → CONFIRMED
+```
+
+| Campo          | Cuándo se llena                          |
+| -------------- | ---------------------------------------- |
+| `tx_hash`      | al enviar la tx al smart contract        |
+| `block_number` | al confirmar la tx on-chain              |
+| `submitted_at` | al llamar `mark_submitted()`             |
+| `paid_at`      | al confirmar la tx on-chain              |
 
 ---
 
-# Flujo Actual
+## Endpoints Satelitales
 
-## Endpoint: POST /rainfall/check
+### POST /rainfall/check
 
-### 1. Cliente envía coordenadas y fechas
+Calcula lluvia acumulada y serie diaria sobre un polígono.
 
+**Request:**
 ```json
 {
-  "coordinates": [
-    [
-      [-60.326698, -38.198767],
-      [-60.306698, -38.198767],
-      [-60.306698, -38.178767],
-      [-60.326698, -38.178767],
-      [-60.326698, -38.198767]
-    ]
-  ],
+  "coordinates": [[[-60.326698, -38.198767], [-60.306698, -38.198767],
+                   [-60.306698, -38.178767], [-60.326698, -38.178767],
+                   [-60.326698, -38.198767]]],
   "start_date": "2024-01-01",
   "end_date": "2024-12-31"
 }
 ```
 
-### 2. Service construye polígono y consulta CHIRPS
-
-```python
-ee.Geometry.Polygon()
-ee.ImageCollection("UCSB-CHG/CHIRPS/DAILY")
-```
-
-### 3. Backend calcula serie diaria y estadísticas
-
-* una imagen por día → reducción espacial sobre el polígono
-* suma total del período
-* promedio diario
-
-### 4. Backend devuelve estadísticas
-
+**Response:**
 ```json
 {
   "total_rainfall_mm": 765.86,
+  "max_observed_mm": 44.66,
   "unit": "mm",
-  "period": {
-    "start": "2024-01-01",
-    "end": "2024-12-31"
-  },
+  "dataset": "UCSB-CHG/CHIRPS/DAILY",
+  "native_scale_meters": 5565.97,
+  "low_confidence": false,
+  "confidence_reasons": [],
+  "period": { "start": "2024-01-01", "end": "2024-12-31" },
   "series": [
-    {"date": "2024-01-01", "precipitation_mm": 2.3},
-    {"date": "2024-01-02", "precipitation_mm": 0.0}
+    { "date": "2024-01-01", "mean_mm": 2.3, "max_mm": 3.1,
+      "min_mm": 1.8, "p95_mm": 3.0, "effective_pixels": 4 }
   ]
 }
 ```
 
+**Métricas:**
+
+| Campo               | Qué representa                          |
+| ------------------- | --------------------------------------- |
+| `total_rainfall_mm` | lluvia acumulada del período            |
+| `max_observed_mm`   | máximo extremo detectado                |
+| `effective_pixels`  | píxeles CHIRPS utilizados               |
+| `low_confidence`    | baja robustez estadística (poco cob.) |
+| `native_scale_meters` | resolución real del dataset           |
+
 ---
 
-## Endpoint: POST /analysis/twi
+### POST /analysis/twi
 
-### 1. Cliente envía polígono
+Calcula el Topographic Wetness Index sobre un polígono desde el DEM SRTM 30m.
 
+**Request:**
 ```json
 {
   "polygon": {
-    "coordinates": [
-      [
-        [-60.326698, -38.198767],
-        [-60.306698, -38.198767],
-        [-60.306698, -38.178767],
-        [-60.326698, -38.178767],
-        [-60.326698, -38.198767]
-      ]
-    ]
+    "coordinates": [[[-60.326698, -38.198767], [-60.306698, -38.198767],
+                     [-60.306698, -38.178767], [-60.326698, -38.178767],
+                     [-60.326698, -38.198767]]]
   }
 }
 ```
 
-### 2. Service calcula TWI desde DEM SRTM (30m)
-
-* pendiente en radianes
-* acumulación de flujo aproximada por convolución
-* TWI = ln(flow_acc / tan(slope))
-* reducción espacial sobre el polígono
-
-### 3. Backend devuelve estadísticas topográficas
-
+**Response:**
 ```json
 {
   "status": "ok",
   "message": "TWI calculado",
-  "data": {
-    "avg_twi": 8.897949874733417,
-    "max_twi": 11.952496185564904
-  }
+  "data": { "avg_twi": 8.89, "max_twi": 11.95 }
 }
 ```
 
-### Interpretación del TWI
+**Interpretación:**
 
-| TWI       | Interpretación                        |
-| --------- | ------------------------------------- |
-| < 6       | zona alta, drena bien                 |
-| 6 - 9     | zona intermedia                       |
-| > 9       | zona baja, acumula agua               |
-| > 11      | muy vulnerable a anegamiento          |
+| TWI    | Interpretación               |
+| ------ | ---------------------------- |
+| < 6    | zona alta, drena bien        |
+| 6 - 9  | zona intermedia              |
+| > 9    | zona baja, acumula agua      |
+| > 11   | muy vulnerable a anegamiento |
 
 ---
 
-## Endpoint: POST /analysis/flood
+### POST /analysis/flood
 
-Detección de anegamiento real con **Sentinel-1 SAR**.
+Detección de anegamiento real con **Sentinel-1 SAR**. El radar atraviesa nubes y funciona de noche. Compara backscatter VV pre vs post sobre el mismo polígono y mismo track orbital.
 
-El radar atraviesa nubes y funciona de noche, por lo que es la fuente
-correcta cuando hay nubosidad alta o el evento ocurre fuera del horario
-diurno. El servicio compara el backscatter VV pre vs post sobre el
-mismo polígono y misma pasada orbital.
-
-### 1. Cliente envía polígono y ventanas pre/post evento
-
+**Request:**
 ```json
 {
-  "polygon": {
-    "coordinates": [
-      [
-        [-60.326698, -38.198767],
-        [-60.306698, -38.198767],
-        [-60.306698, -38.178767],
-        [-60.326698, -38.178767],
-        [-60.326698, -38.198767]
-      ]
-    ]
-  },
+  "polygon": { "coordinates": [[...]] },
   "pre_event":  { "start_date": "2024-01-01", "end_date": "2024-01-20" },
   "post_event": { "start_date": "2024-02-01", "end_date": "2024-02-15" },
   "orbit": "DESCENDING",
@@ -335,221 +386,174 @@ mismo polígono y misma pasada orbital.
 ```
 
 `orbit`, `flood_threshold_db` y `min_flooded_area_pct` son opcionales.
-Si no se fija `orbit`, el service elige automáticamente la pasada con
-más escenas en el post-evento. `min_flooded_area_pct` (default 5%) es
-el umbral binario por escena para considerarla "anegada" — subir para
-cultivos tolerantes, bajar para sensibles.
 
-### 2. Service procesa con Earth Engine
-
-* filtra `COPERNICUS/S1_GRD` por VV / IW / 10m / mismo `relativeOrbitNumber_start`
-* construye composites:
-  * **pre = median()** — baseline robusto del estado seco típico
-  * **post = min()** — captura el píxel más oscuro de cada lugar a lo largo
-    del período post, exponiendo eventos cortos que la mediana ahogaría
-* aplica focal_median (despeckle) sobre cada composite
-* aplica el umbral en dB para clasificar agua
-* análisis adicional escena por escena para `flood_detected` y `flood_days`
-
-### 3. Backend devuelve estadísticas SAR
-
+**Response:**
 ```json
 {
   "status": "ok",
-  "message": "Detección de anegamiento completada",
-  "pre_event": {
-    "period": { "start_date": "2024-01-01", "end_date": "2024-01-20" },
-    "scene_count": 5,
-    "vv_mean_db": -10.42
-  },
-  "post_event": {
-    "period": { "start_date": "2024-02-01", "end_date": "2024-02-15" },
-    "scene_count": 4,
-    "vv_mean_db": -16.18
-  },
-  "orbit_used": "DESCENDING",
-  "flood_threshold_db": -17.0,
-  "min_flooded_area_pct": 5.0,
   "flooded_area_pct": 23.41,
   "new_flooded_area_pct": 19.07,
   "delta_vv_db": -5.76,
   "flood_detected": true,
   "flood_days": 32,
   "scenes": [
-    { "date": "2024-02-03", "new_flooded_pct": 18.42, "flooded": true },
-    { "date": "2024-02-15", "new_flooded_pct": 21.07, "flooded": true },
-    { "date": "2024-03-06", "new_flooded_pct": 11.34, "flooded": true },
-    { "date": "2024-03-18", "new_flooded_pct": 2.11, "flooded": false }
+    { "date": "2024-02-03", "new_flooded_pct": 18.42, "flooded": true }
   ]
 }
 ```
 
-### Interpretación del backscatter VV
+**Interpretación del backscatter VV:**
 
-| VV (dB)      | Superficie                                  |
-| ------------ | ------------------------------------------- |
-| > -10        | suelo seco, vegetación densa                |
-| -10 a -15    | suelo húmedo, cultivo                       |
-| -15 a -17    | transición / cultivo anegado                |
-| < -17        | superficie de agua libre                    |
+| VV (dB)    | Superficie                        |
+| ---------- | --------------------------------- |
+| > -10      | suelo seco, vegetación densa      |
+| -10 a -15  | suelo húmedo, cultivo             |
+| -15 a -17  | transición / cultivo anegado      |
+| < -17      | superficie de agua libre          |
 
-| Métrica                 | Qué representa                                        |
-| ----------------------- | ----------------------------------------------------- |
-| `flooded_area_pct`      | % del polígono clasificado como agua en el post       |
-| `new_flooded_area_pct`  | % que pasó de NO-agua (pre) a agua (post) — efecto neto del evento |
-| `delta_vv_db`           | caída de backscatter medio. Más negativo = más agua   |
-| `flood_detected`        | `true` si al menos una escena post supera `min_flooded_area_pct` vs baseline |
-| `flood_days`            | span en días entre la primera y la última escena anegada |
-| `scenes`                | detalle por escena (fecha, % nuevo-inundado, flag binaria) |
-
-`new_flooded_area_pct` es la métrica clave para el motor paramétrico:
-descuenta cuerpos de agua permanentes (lagunas, cauces) y aísla el
-cambio atribuible al evento. `flood_detected` + `flood_days` son los
-disparadores binarios y la duración que se ata al payout.
-
-**Nota sobre `flood_days`.** Sentinel-1 revisita cada ~6–12 días, por
-lo que `flood_days` no es una medición diaria sino el *span* entre la
-primera y la última escena que cumplió el umbral dentro del
-`post_event`. Es la métrica honesta dada la cadencia del sensor.
-
-**Por qué pre = median y post = min.** El motor paramétrico tiene que
-ser robusto a dos situaciones contrapuestas:
-
-* **Eventos largos** (Pakistán Sindh 2022 — anegamiento por semanas).
-  Cualquier reducer captura la señal. La mediana es fina.
-* **Eventos cortos** (Ciclón Idai 2019 — peak de 1–2 días, drena
-  rápido). Si solo una escena post está bajo agua y las siguientes
-  están secas, la mediana por píxel devuelve "seco" — ahoga el peak.
-  Por eso al post se le aplica `min()`: para cada píxel toma su
-  momento más oscuro durante el período post, exponiendo agua aunque
-  haya durado un solo barrido. Es el approach estándar de UN-SPIDER
-  para flood detection con SAR.
-
-Al pre se le mantiene la mediana porque ahí queremos el estado seco
-"típico" como baseline — no el peor caso (que podría incluir lluvias
-puntuales que contaminarían la referencia).
+**Por qué pre = median y post = min:**
+El pre usa mediana para obtener un baseline seco robusto. El post usa min() para capturar el peak de inundación incluso en eventos cortos que drenan antes de la siguiente revisita de Sentinel-1 (~6-12 días). Es el approach estándar de UN-SPIDER para flood detection con SAR.
 
 ---
 
-# Datos que ofrece el Backend
+### POST /analysis/ndvi
 
-## /rainfall/check
+Calcula NDVI desde Sentinel-2 con filtro de nubosidad y clasificación vegetativa.
 
-| campo                 | qué es                                |
-| --------------------- | ------------------------------------- |
-| `total_rainfall_mm`   | cuánto llovió en todo el período      |
-| `unit`                | unidad de medida (mm)                 |
-| `period`              | el rango de fechas consultado         |
-| `series`              | lluvia real de cada día               |
-
-## /analysis/twi
-
-| campo       | qué es                                          |
-| ----------- | ----------------------------------------------- |
-| `avg_twi`   | humedad topográfica promedio del polígono        |
-| `max_twi`   | zona más vulnerable dentro del polígono         |
-
-## /analysis/flood
-
-| campo                   | qué es                                                  |
-| ----------------------- | ------------------------------------------------------- |
-| `pre_event.vv_mean_db`  | backscatter VV medio antes del evento (referencia seca) |
-| `post_event.vv_mean_db` | backscatter VV medio después del evento                 |
-| `flooded_area_pct`      | % de área inundada total en el post-evento              |
-| `new_flooded_area_pct`  | % de área NUEVA inundada atribuible al evento           |
-| `delta_vv_db`           | caída del backscatter medio (post - pre)                |
-| `orbit_used`            | pasada orbital utilizada (ASCENDING / DESCENDING)       |
-| `flood_detected`        | booleano — hubo o no anegamiento real atribuible al evento |
-| `flood_days`            | duración del anegamiento detectable (en días)           |
-| `scenes`                | observaciones por escena                                |
-
----
-
-# Logging
-
-El backend utiliza logging centralizado.
-
-Ejemplo:
-
-```text
-INFO - comprobando la lluvia
-INFO - serie diaria calculada: 365 días
-INFO - calculo de lluvia completado
+**Response:**
+```json
+{
+  "low_confidence": false,
+  "ndvi": {
+    "ndvi_mean": 0.4149,
+    "ndvi_min": 0.1691,
+    "ndvi_max": 0.8538,
+    "ndvi_median": 0.4004,
+    "image_count": 59
+  },
+  "classification": {
+    "label": "moderate_crop",
+    "description": "Cultivo en desarrollo o pastizal",
+    "value": 0.4149
+  },
+  "dataset": "COPERNICUS/S2_SR_HARMONIZED",
+  "resolution_meters": 10
+}
 ```
 
----
+**Interpretación NDVI:**
 
-# Fundamento Agronómico de los Umbrales
-
-Basado en literatura del INTA y AAPRESID para cultivos de la región pampeana:
-
-| Cultivo | Días anegado      | Pérdida estimada              |
-| ------- | ----------------- | ----------------------------- |
-| Soja    | < 2 días          | sin consecuencias             |
-| Soja    | 3 días (temprana) | ~20% rendimiento              |
-| Soja    | 4+ días           | reducción población + rinde   |
-| Soja    | 7+ días           | daño severo observable        |
-| Maíz    | 2-4 días          | sin pérdida apreciable        |
-| Maíz    | > 4 días          | daño según etapa fenológica   |
+| NDVI      | Interpretación              |
+| --------- | --------------------------- |
+| < 0.2     | suelo desnudo               |
+| 0.2 - 0.4 | vegetación baja             |
+| 0.4 - 0.6 | cultivo moderado            |
+| 0.6 - 0.8 | cultivo vigoroso            |
+| > 0.8     | vegetación extremadamente densa |
 
 ---
 
-# Estado Actual del Proyecto
+## Pipeline de Detección de Pérdida de Cosecha
 
-Actualmente implementado:
-
-* arquitectura modular FastAPI
-* integración Earth Engine
-* cálculo de lluvia acumulada y serie diaria (CHIRPS)
-* cálculo de TWI para detección de zonas vulnerables (SRTM)
-* detección de anegamiento real con Sentinel-1 SAR (pre vs post evento)
-* separación routes / services / providers
-* logging centralizado
-* validación con Pydantic (coordenadas + fechas dinámicas)
-
----
-
-# Pipeline de Detección de Pérdida de Cosecha
-
-El objetivo del sistema es combinar cuatro fuentes para validar pérdida de cultivo:
+El motor paramétrico combina cuatro fuentes satelitales para validar pérdida de cultivo y reducir falsos positivos:
 
 ```text
 CHIRPS      → cuánto llovió
-DEM + TWI   → dónde se acumularía el agua
-Sentinel-1  → si realmente se acumuló
-NDVI        → si el cultivo se dañó
+DEM + TWI   → dónde se acumularía el agua topográficamente
+Sentinel-1  → si realmente hubo inundación (SAR atraviesa nubes)
+NDVI        → si el cultivo sufrió daño vegetativo
 ```
 
----
-
-# Próximos Pasos
-
-## Corto plazo
-
-* NDVI (Sentinel-2) — análisis de daño en vegetación (pre vs post evento)
-* manejo de excepciones
-* response models con Pydantic
-
-## Mediano plazo
-
-* motor paramétrico — combina las cuatro fuentes con umbrales INTA
-* triggers automáticos por cultivo y etapa fenológica
-* scoring climático con niveles de severidad
-* integración blockchain Avalanche
-* smart contract payouts
+La coincidencia de múltiples fuentes reduce fraude, errores climáticos y payouts incorrectos.
 
 ---
 
-# Visión
+## Fundamento Agronómico
 
-El objetivo final es construir un motor paramétrico agrícola híbrido que combine:
+Basado en literatura del INTA y AAPRESID para cultivos de la región pampeana:
 
-* análisis satelital multi-fuente
-* umbrales agronómicos validados (INTA / AAPRESID)
-* automatización climática
-* blockchain Avalanche
-* pagos automáticos escalonados por severidad
-* reducción de fraude mediante hash de polígono y firma de oráculo
-* infraestructura escalable
+| Cultivo | Días anegado | Pérdida estimada            |
+| ------- | ------------ | --------------------------- |
+| Soja    | < 2 días     | sin consecuencias           |
+| Soja    | 3 días       | ~20% de rendimiento         |
+| Soja    | 4+ días      | reducción de población + rinde |
+| Soja    | 7+ días      | daño severo observable      |
+| Maíz    | 2-4 días     | sin pérdida apreciable      |
+| Maíz    | > 4 días     | daño según etapa fenológica |
 
-orientado a seguros agrícolas institucionales sobre Avalanche.
+---
+
+## Anti-Fraude
+
+El sistema implementa múltiples mecanismos para garantizar integridad:
+
+- **`polygon_hash`** — SHA-256 del GeoJSON normalizado del polígono. Si la geometría se modifica después de emitida la póliza, el hash cambia y se detecta.
+- **`payload_hash`** — SHA-256 determinístico de la query + fórmula + datos satelitales. El smart contract puede recomputarlo para verificar reproducibilidad: mismo polígono + período + dataset → mismo hash.
+- **`terms_hash`** — SHA-256 del `trigger_snapshot` inmutable. Congela las condiciones de la póliza al momento de emisión.
+- **`signature`** — firma ECDSA del oráculo sobre el `payload_hash`.
+- **`basis_risk_flag`** — se activa cuando las fuentes satelitales disienten, mandando el evento a revisión manual antes de gatillar el payout.
+
+---
+
+## Variables de Entorno
+
+```env
+# Base de datos
+DATABASE_URL=postgresql://user:password@localhost:5432/parasol_db
+
+# Blockchain — Avalanche Fuji
+AVALANCHE_FUJI_RPC=https://api.avax-test.network/ext/bc/C/rpc
+PRIVATE_KEY=0x...
+CHAIN_ID=43113
+
+# Contratos (se completan al deployar)
+POLICY_CONTRACT_ADDRESS=0x...
+ENGINE_CONTRACT_ADDRESS=0x...
+POOL_CONTRACT_ADDRESS=0x...
+```
+
+Si `POLICY_CONTRACT_ADDRESS` no está configurado, el backend inicia sin el listener on-chain. Al deployar el contrato se agrega la dirección al `.env` y se reinicia el backend.
+
+---
+
+## Estado Actual
+
+Implementado:
+
+- arquitectura modular FastAPI con separación routes / services / providers
+- integración Google Earth Engine
+- análisis CHIRPS (lluvia acumulada, serie diaria, estadísticas espaciales, detección de baja cobertura)
+- análisis TWI desde DEM SRTM
+- detección de anegamiento con Sentinel-1 SAR (pre vs post, análisis por escena)
+- análisis NDVI desde Sentinel-2 con clasificación vegetativa
+- logging centralizado
+- modelos de dominio completos (User, Field, Policy, PolicyPayout, LiquidityPool, ParametricEvent)
+- repositorios con funciones de ciclo de vida y transiciones de estado
+- integración Web3.py con Avalanche Fuji
+- wrappers de smart contracts (Pool, Policy, Engine)
+- listener de eventos on-chain para sincronización automática de DB
+
+---
+
+## Próximos Pasos
+
+### Corto plazo
+
+- implementar `parametricService.py` con motor de evaluación de triggers
+- implementar `oracleService.py` con firma ECDSA de eventos
+- manejo avanzado de excepciones en endpoints
+- response models tipados con Pydantic en todos los endpoints
+
+### Mediano plazo
+
+- motor paramétrico multi-fuente con umbrales INTA por cultivo y etapa fenológica
+- scoring climático con niveles de severidad (leve / moderado / severo)
+- triggers automáticos → payout on-chain
+- NDVI temporal pre/post evento para confirmar daño vegetativo
+- infraestructura de auditoría verificable on-chain
+
+---
+
+## Visión
+
+Motor paramétrico agrícola híbrido que combina análisis satelital multi-fuente con umbrales agronómicos validados, automatización climática, blockchain Avalanche y pagos automáticos escalonados por severidad, orientado a seguros agrícolas institucionales con auditoría verificable y reducción de fraude.
