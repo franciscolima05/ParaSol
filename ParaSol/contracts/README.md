@@ -1,21 +1,66 @@
-# Contracts
+## Foundry
 
-Smart contracts del proyecto ParaSol con Hardhat + Solidity.
+**Foundry is a blazing fast, portable and modular toolkit for Ethereum application development written in Rust.**
 
-## Setup
+Foundry consists of:
 
-```bash
-npm install
-cp ../.env.example ../.env
+- **Forge**: Ethereum testing framework (like Truffle, Hardhat and DappTools).
+- **Cast**: Swiss army knife for interacting with EVM smart contracts, sending transactions and getting chain data.
+- **Anvil**: Local Ethereum node, akin to Ganache, Hardhat Network.
+- **Chisel**: Fast, utilitarian, and verbose solidity REPL.
+
+## Documentation
+
+https://book.getfoundry.sh/
+
+## Usage
+
+### Build
+
+```shell
+$ forge build
 ```
 
-## Comandos
+### Test
 
-```bash
-npx hardhat compile             # Compilar
-npx hardhat test                # Tests
-npx hardhat node                # Nodo local
-npx hardhat run scripts/deploy.ts --network fuji      # Deploy a Fuji
-npx hardhat run scripts/deploy.ts --network avalanche # Deploy a mainnet
-npx hardhat verify --network fuji <address> <args...> # Verificar en Snowtrace
+```shell
+$ forge test
+```
+
+### Format
+
+```shell
+$ forge fmt
+```
+
+### Gas Snapshots
+
+```shell
+$ forge snapshot
+```
+
+### Anvil
+
+```shell
+$ anvil
+```
+
+### Deploy
+
+```shell
+$ forge script script/Counter.s.sol:CounterScript --rpc-url <your_rpc_url> --private-key <your_private_key>
+```
+
+### Cast
+
+```shell
+$ cast <subcommand>
+```
+
+### Help
+
+```shell
+$ forge --help
+$ anvil --help
+$ cast --help
 ```
