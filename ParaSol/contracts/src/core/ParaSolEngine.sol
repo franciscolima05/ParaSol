@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
-import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/access/AccessControl.sol";
+
 interface IParaSolPolicy {
     function getPolicyDetails(uint256 tokenId) external view returns (
         string memory fieldHash, uint256 poolId, uint256 coverageUSDC, 
@@ -14,28 +15,31 @@ interface IParaSolPolicy {
 interface IParaSolPool {
     function executePayout(uint256 poolId, address farmerAddress, uint256 payoutAmount) external;
 }
-
-contract ParaSolEngine is Ownable {
+contract ParaSolEngine is AccessControl{
     IParaSolPolicy public policyContract;
     IParaSolPool public poolContract;
-    
-    address public oracle; 
+    bytes32 public constant DEV_ROLE = keccak256("DEV_ROLE");
+    bytes32 public constant ADMIN_ROLE = keccak256("ADMIN_ROLE");
+    bytes32 public constant ORACLE_ROLE = keccak256("ORACLE_ROLE");
 
     mapping(uint256 => uint256) public percentagePaidOut;
 
     event PayoutTriggered(uint256 indexed policyId, uint256 ndviDrop, uint256 payoutPercent, uint256 amountUSDC);
 
-    modifier onlyOracle() {
-        require(msg.sender == oracle, "Solo el oraculo (Backend) puede reportar");
-        _;
-    }
-
-    constructor(address _policyAddress, address _poolAddress, address _oracleAddress, address initialOwner) Ownable(initialOwner) {
+    constructor(address _policyAddress, address _poolAddress, address initialSuperAdmin, address initialDev, address oracleBackend) {
         policyContract = IParaSolPolicy(_policyAddress);
         poolContract = IParaSolPool(_poolAddress);
-        oracle = _oracleAddress;
+
+        _setRoleAdmin(ADMIN_ROLE, DEFAULT_ADMIN_ROLE);
+        _setRoleAdmin(DEV_ROLE, DEFAULT_ADMIN_ROLE);
+        _setRoleAdmin(ORACLE_ROLE, DEV_ROLE);
+
+        _grantRole(DEFAULT_ADMIN_ROLE, initialSuperAdmin);
+        _grantRole(ADMIN_ROLE, initialSuperAdmin);
+        _grantRole(DEV_ROLE, initialDev);
+        _grantRole(ORACLE_ROLE, oracleBackend);
     }
-    function processParametricEvent(uint256 policyId, uint256 ndviDrop) external onlyOracle {
+    function processParametricEvent(uint256 policyId, uint256 ndviDrop) external onlyRole(ORACLE_ROLE) {
         (
             , uint256 poolId, uint256 coverageUSDC, , 
             uint256 startDate, uint256 endDate, , bool isActive
