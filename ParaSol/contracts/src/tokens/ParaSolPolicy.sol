@@ -11,7 +11,7 @@ contract ParaSolPolicy is ERC721, Ownable {
         string fieldHash;
         uint256 poolId;            // opcional por el momento
         uint256 coverageUSDC;      // Monto de cobertura en USDC
-        uint256 payUSDC;           // monto real pagado
+        uint256 premiumUSDC;           // monto pagado por el seguro en USDC
         uint256 startDate;         // Fecha inicio vigencia
         uint256 endDate;           // Fecha fin
         string triggerSnapshotHash;// El hash del JSONB (peril, fuentes, severidad congelada)
