@@ -1,0 +1,270 @@
+{
+  "info": {
+    "name": "ParaSol Backend",
+    "description": "Endpoints geoespaciales de ParaSol: lluvia (CHIRPS), TWI (SRTM) y anegamiento (Sentinel-1 SAR).\n\nVariables:\n- baseUrl: URL del backend FastAPI (default http://localhost:8000)",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_postman_id": "a4f3c8b1-2d6e-4a7f-9b1c-parasol000001"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8000",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Health check",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/",
+          "host": ["{{baseUrl}}"],
+          "path": [""]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Rainfall check — CHIRPS (Tres Arroyos 2025)",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"coordinates\": [\n    [-60.326698, -38.198767],\n    [-60.306698, -38.198767],\n    [-60.306698, -38.178767],\n    [-60.326698, -38.178767],\n    [-60.326698, -38.198767]\n  ],\n  \"start_date\": \"2025-01-01\",\n  \"end_date\": \"2025-12-31\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/rainfall/check",
+          "host": ["{{baseUrl}}"],
+          "path": ["rainfall", "check"]
+        },
+        "description": "Lluvia acumulada y serie diaria CHIRPS sobre un polígono ~2×2 km cerca de Tres Arroyos (sur BsAs), año calendario 2025 completo. Devuelve total_rainfall_mm, unit, period y series[365]."
+      },
+      "response": []
+    },
+    {
+      "name": "Rainfall check — CHIRPS (Salado 2017)",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"coordinates\": [\n    [\n      [-60.20, -35.48],\n      [-60.13, -35.48],\n      [-60.13, -35.42],\n      [-60.20, -35.42],\n      [-60.20, -35.48]\n    ]\n  ],\n  \"start_date\": \"2016-11-01\",\n  \"end_date\": \"2017-03-31\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/rainfall/check",
+          "host": ["{{baseUrl}}"],
+          "path": ["rainfall", "check"]
+        },
+        "description": "Lluvia acumulada en la cuenca del Salado (25 de Mayo, BsAs) durante el período de la inundación de verano 2016-2017. Debería devolver acumulados muy por encima de la media climática."
+      },
+      "response": []
+    },
+    {
+      "name": "TWI — SRTM (Salado 2017)",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"polygon\": {\n    \"coordinates\": [\n      [\n        [-60.20, -35.48],\n        [-60.13, -35.48],\n        [-60.13, -35.42],\n        [-60.20, -35.42],\n        [-60.20, -35.48]\n      ]\n    ]\n  }\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/analysis/twi",
+          "host": ["{{baseUrl}}"],
+          "path": ["analysis", "twi"]
+        },
+        "description": "TWI sobre el mismo polígono. La pampa deprimida tiene pendientes muy bajas → TWI alto (zonas que acumulan agua)."
+      },
+      "response": []
+    },
+    {
+      "name": "Flood detection — Sentinel-1 (Pakistán Sindh 2022) [GARANTIZADO]",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"polygon\": {\n    \"coordinates\": [\n      [\n        [67.80, 27.50],\n        [67.90, 27.50],\n        [67.90, 27.60],\n        [67.80, 27.60],\n        [67.80, 27.50]\n      ]\n    ]\n  },\n  \"pre_event\": {\n    \"start_date\": \"2022-06-01\",\n    \"end_date\": \"2022-07-15\"\n  },\n  \"post_event\": {\n    \"start_date\": \"2022-08-25\",\n    \"end_date\": \"2022-09-30\"\n  }\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/analysis/flood",
+          "host": ["{{baseUrl}}"],
+          "path": ["analysis", "flood"]
+        },
+        "description": "Inundaciones monzónicas Pakistán 2022 (Sindh, distrito Larkana). El evento cubrió ~33% del país. Ventanas amplias, S1A+S1B activos, cobertura excelente. pick_best_track elige automáticamente el track con mejor cobertura simétrica. flood_detected esperado = true con delta_vv_db muy negativo."
+      },
+      "response": []
+    },
+    {
+      "name": "Flood detection — Sentinel-1 (Idai 2019 Pungwe — coords v2)",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"polygon\": {\n    \"coordinates\": [\n      [\n        [34.65, -19.85],\n        [34.75, -19.85],\n        [34.75, -19.75],\n        [34.65, -19.75],\n        [34.65, -19.85]\n      ]\n    ]\n  },\n  \"pre_event\": {\n    \"start_date\": \"2019-02-15\",\n    \"end_date\": \"2019-03-10\"\n  },\n  \"post_event\": {\n    \"start_date\": \"2019-03-18\",\n    \"end_date\": \"2019-04-05\"\n  }\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/analysis/flood",
+          "host": ["{{baseUrl}}"],
+          "path": ["analysis", "flood"]
+        },
+        "description": "Idai 2019 con coords movidas al este — planicie del río Pungwe, zona realmente catastróficamente inundada (la del oeste de Buzi quedaba en terreno más elevado). pick_best_track elige automáticamente. Esperamos flood_detected=true."
+      },
+      "response": []
+    },
+    {
+      "name": "Flood detection — Sentinel-1 (RS Brasil 2024) [PRIMARY DEMO]",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"polygon\": {\n    \"coordinates\": [\n      [\n        [-51.65, -30.10],\n        [-51.58, -30.10],\n        [-51.58, -30.04],\n        [-51.65, -30.04],\n        [-51.65, -30.10]\n      ]\n    ]\n  },\n  \"pre_event\": {\n    \"start_date\": \"2024-04-10\",\n    \"end_date\": \"2024-04-25\"\n  },\n  \"post_event\": {\n    \"start_date\": \"2024-05-08\",\n    \"end_date\": \"2024-05-25\"\n  },\n  \"orbit\": \"DESCENDING\",\n  \"flood_threshold_db\": -17.0,\n  \"min_flooded_area_pct\": 5.0\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/analysis/flood",
+          "host": ["{{baseUrl}}"],
+          "path": ["analysis", "flood"]
+        },
+        "description": "Demo principal: Inundación catastrófica de Rio Grande do Sul (Brasil), mayo 2024. Polígono ~7×7 km en Eldorado do Sul (planicie del río Jacuí). Pre seco (abril) vs post bajo agua (mayo). Caso limpio sin cuerpos de agua permanentes — se espera flood_detected=true, delta_vv_db muy negativo, flood_days > 14."
+      },
+      "response": []
+    },
+    {
+      "name": "Flood detection — Sentinel-1 (Idai 2019 corregido)",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"polygon\": {\n    \"coordinates\": [\n      [\n        [34.40, -19.85],\n        [34.50, -19.85],\n        [34.50, -19.75],\n        [34.40, -19.75],\n        [34.40, -19.85]\n      ]\n    ]\n  },\n  \"pre_event\": {\n    \"start_date\": \"2019-02-15\",\n    \"end_date\": \"2019-03-10\"\n  },\n  \"post_event\": {\n    \"start_date\": \"2019-03-18\",\n    \"end_date\": \"2019-04-05\"\n  },\n  \"orbit\": \"DESCENDING\",\n  \"flood_threshold_db\": -17.0\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/analysis/flood",
+          "host": ["{{baseUrl}}"],
+          "path": ["analysis", "flood"]
+        },
+        "description": "Idai 2019 con coordenadas corregidas: polígono sobre la planicie del Pungwe al oeste de Beira (tierra agrícola real, no estuario). Las coords originales caían sobre manglares costeros que ya eran agua permanente — daba new_flooded_pct cercano a 0."
+      },
+      "response": []
+    },
+    {
+      "name": "Flood detection — Sentinel-1 (Salado 2017) [no anegado en este recorte]",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"polygon\": {\n    \"coordinates\": [\n      [\n        [-60.20, -35.48],\n        [-60.13, -35.48],\n        [-60.13, -35.42],\n        [-60.20, -35.42],\n        [-60.20, -35.48]\n      ]\n    ]\n  },\n  \"pre_event\": {\n    \"start_date\": \"2016-11-15\",\n    \"end_date\": \"2016-12-31\"\n  },\n  \"post_event\": {\n    \"start_date\": \"2017-02-15\",\n    \"end_date\": \"2017-03-31\"\n  },\n  \"orbit\": \"DESCENDING\",\n  \"flood_threshold_db\": -17.0\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/analysis/flood",
+          "host": ["{{baseUrl}}"],
+          "path": ["analysis", "flood"]
+        },
+        "description": "Cuenca del Salado 2017, campo cerca de 25 de Mayo (BsAs). En la práctica este recorte no estuvo bajo agua libre; queda como contra-ejemplo útil — el motor paramétrico NO debe disparar payout acá. flood_detected esperado = false."
+      },
+      "response": []
+    },
+    {
+      "name": "Flood DEBUG — coverage RS Brasil 2024 abril",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"polygon\": {\n    \"coordinates\": [\n      [\n        [-51.65, -30.10],\n        [-51.58, -30.10],\n        [-51.58, -30.04],\n        [-51.65, -30.04],\n        [-51.65, -30.10]\n      ]\n    ]\n  },\n  \"start_date\": \"2024-04-10\",\n  \"end_date\": \"2024-04-25\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/analysis/flood/debug",
+          "host": ["{{baseUrl}}"],
+          "path": ["analysis", "flood", "debug"]
+        },
+        "description": "Diagnóstico de cobertura S1 para el polígono de Eldorado do Sul en la ventana pre-evento que daba scene_count=0. Muestra cuántas escenas matchean cada filtro acumulado para identificar dónde se cortan."
+      },
+      "response": []
+    },
+    {
+      "name": "Flood DEBUG — coverage RS Brasil 2024 mayo",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"polygon\": {\n    \"coordinates\": [\n      [\n        [-51.65, -30.10],\n        [-51.58, -30.10],\n        [-51.58, -30.04],\n        [-51.65, -30.04],\n        [-51.65, -30.10]\n      ]\n    ]\n  },\n  \"start_date\": \"2024-05-08\",\n  \"end_date\": \"2024-05-25\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/analysis/flood/debug",
+          "host": ["{{baseUrl}}"],
+          "path": ["analysis", "flood", "debug"]
+        },
+        "description": "Diagnóstico de cobertura S1 para el polígono de Eldorado do Sul en la ventana post-evento. Esperamos > 1 escenas si la cobertura es razonable."
+      },
+      "response": []
+    },
+    {
+      "name": "Flood DEBUG — coverage Idai 2019 (coords corregidas)",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"polygon\": {\n    \"coordinates\": [\n      [\n        [34.40, -19.85],\n        [34.50, -19.85],\n        [34.50, -19.75],\n        [34.40, -19.75],\n        [34.40, -19.85]\n      ]\n    ]\n  },\n  \"start_date\": \"2019-02-15\",\n  \"end_date\": \"2019-04-05\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/analysis/flood/debug",
+          "host": ["{{baseUrl}}"],
+          "path": ["analysis", "flood", "debug"]
+        },
+        "description": "Diagnóstico Idai 2019 con coords corregidas + ventana ancha (pre+post juntos). Verifica cuántas escenas hay disponibles cuando ambos S1A y S1B estaban activos."
+      },
+      "response": []
+    },
+    {
+      "name": "Flood detection — orbit auto (sin fijar pasada)",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"polygon\": {\n    \"coordinates\": [\n      [\n        [-60.20, -35.48],\n        [-60.13, -35.48],\n        [-60.13, -35.42],\n        [-60.20, -35.42],\n        [-60.20, -35.48]\n      ]\n    ]\n  },\n  \"pre_event\": {\n    \"start_date\": \"2016-11-15\",\n    \"end_date\": \"2016-12-31\"\n  },\n  \"post_event\": {\n    \"start_date\": \"2017-02-15\",\n    \"end_date\": \"2017-03-31\"\n  }\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/analysis/flood",
+          "host": ["{{baseUrl}}"],
+          "path": ["analysis", "flood"]
+        },
+        "description": "Mismo caso del Salado pero dejando que el service elija automáticamente la pasada orbital con más escenas. flood_threshold_db cae al default (-17 dB)."
+      },
+      "response": []
+    }
+  ]
+}
