@@ -35,4 +35,30 @@ contract ParaSolEngine is Ownable {
         poolContract = IParaSolPool(_poolAddress);
         oracle = _oracleAddress;
     }
+    function processParametricEvent(uint256 policyId, uint256 ndviDrop) external onlyOracle {
+        (
+            , uint256 poolId, uint256 coverageUSDC, , 
+            uint256 startDate, uint256 endDate, , bool isActive
+        ) = policyContract.getPolicyDetails(policyId);
+
+        require(isActive, "La poliza no esta activa");
+        require(block.timestamp >= startDate && block.timestamp <= endDate, "Fuera de vigencia");
+        
+        uint256 targetPayoutPercent = (ndviDrop / 5) * 5;
+        require(targetPayoutPercent >= 20, "El dano no supera la franquicia minima del 20%");
+        if (targetPayoutPercent > 100) { targetPayoutPercent = 100; }
+
+        uint256 alreadyPaidPercent = percentagePaidOut[policyId];
+        require(targetPayoutPercent > alreadyPaidPercent, "Este tramo ya fue pagado");
+
+        uint256 percentToPayNow = targetPayoutPercent - alreadyPaidPercent;
+        uint256 amountToPayUSDC = (coverageUSDC * percentToPayNow) / 100;
+
+        percentagePaidOut[policyId] = targetPayoutPercent;
+
+        address farmer = policyContract.ownerOf(policyId);
+        poolContract.executePayout(poolId, farmer, amountToPayUSDC);
+
+        emit PayoutTriggered(policyId, ndviDrop, percentToPayNow, amountToPayUSDC);
+    }
 }
