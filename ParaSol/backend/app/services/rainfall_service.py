@@ -48,8 +48,7 @@ def check_rainfall_service(data):
     # cuánto llovió en total
     total_rainfall_mm = sum(valid_days)
 
-    # cuánto llovió en promedio por día
-    avg_daily_rainfall_mm = sum(valid_days) / len(valid_days)
+
 
 
     logger.info("serie diaria calculada: %s días", len(series))

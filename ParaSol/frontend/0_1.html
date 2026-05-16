@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ParaSol - Seguros Agrícolas Paramétricos</title>
+    <style>
+        :root {
+            --bg-space: #0A0A0F;
+            --bg-panel: #FDF6EC;
+            --accent-primary: #F5A623;
+            --accent-secondary: #E8671A;
+            --green: #4A7C2F;
+            --text: #2D5A1B;
+        }
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: var(--bg-space);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        #canvas-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Header */
+        #header {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            pointer-events: none;
+        }
+
+        .logo-container {
+            width: 50px;
+            height: 50px;
+        }
+
+        .brand-info h1 {
+            margin: 0;
+            color: var(--bg-panel);
+            font-size: 24px;
+            letter-spacing: 1px;
+        }
+
+        .brand-info p {
+            margin: 0;
+            color: var(--bg-panel);
+            opacity: 0.7;
+            font-size: 14px;
+        }
+
+        /* Side Panel */
+        #side-panel {
+            position: absolute;
+            top: 100px;
+            left: 20px;
+            width: 320px;
+            background-color: rgba(253, 246, 236, 0.85);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 24px;
+            box-sizing: border-box;
+            color: var(--text);
+            z-index: 10;
+            transform: translateX(-360px);
+            opacity: 0;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        #side-panel h2 {
+            margin-top: 0;
+            color: var(--accent-secondary);
+            font-size: 20px;
+        }
+
+        .instructions {
+            font-size: 14px;
+            line-height: 1.5;
+            margin-bottom: 20px;
+        }
+
+        .counter {
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+
+        .btn:disabled {
+            background-color: #ccc !important;
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+        #btn-close {
+            background-color: var(--accent-primary);
+            color: white;
+        }
+
+        #btn-analyze {
+            background-color: var(--accent-secondary);
+            color: white;
+            display: none;
+        }
+
+        .btn:hover:not(:disabled) {
+            filter: brightness(1.1);
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body>
+
+    <div id="header">
+        <div class="logo-container">
+            <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                <path d="M50 10 C25 10 10 35 10 35 L50 35 L90 35 C90 35 75 10 50 10 Z" fill="#F5A623" />
+                <path d="M50 35 L50 85" stroke="#E8671A" stroke-width="6" stroke-linecap="round" />
+                <path d="M50 85 C55 85 60 80 60 75" fill="none" stroke="#E8671A" stroke-width="6" stroke-linecap="round" />
+            </svg>
+        </div>
+        <div class="brand-info">
+            <h1>ParaSol</h1>
+            <p>Seguros agrícolas paramétricos</p>
+        </div>
+    </div>
+
+    <div id="side-panel">
+        <h2>Marcá tu terreno</h2>
+        <p class="instructions">Hacé click sobre el globo para marcar los vértices de tu campo.</p>
+        <div class="counter" id="point-counter">Puntos marcados: 0</div>
+        <button id="btn-close" class="btn" disabled>Cerrar polígono</button>
+        <button id="btn-analyze" class="btn">Analizar terreno</button>
+    </div>
+
+    <div id="canvas-container"></div>
+
+<!-- GSAP va antes, es UMD normal -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+
+<!-- Three.js via importmap -->
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+  }
+}
+</script>
+
+    <script type="module">
+        // Configuración inicial
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(window.devicePixelRatio);
+        document.getElementById('canvas-container').appendChild(renderer.domElement);
+
+        // Luces
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
+        scene.add(ambientLight);
+        const sunLight = new THREE.DirectionalLight(0xffffff, 1);
+        sunLight.position.set(5, 3, 5);
+        scene.add(sunLight);
+
+        // Globo
+        const radius = 5;
+        const segments = 64;
+        const geometry = new THREE.SphereGeometry(radius, segments, segments);
+        const textureLoader = new THREE.TextureLoader();
+        const earthTexture = textureLoader.load('https://unpkg.com/three-globe/example/img/earth-blue-marble.jpg');
+        
+        const material = new THREE.MeshPhongMaterial({
+            map: earthTexture,
+            shininess: 5
+        });
+        const earth = new THREE.Mesh(geometry, material);
+        scene.add(earth);
+
+        // Estrellas de fondo (opcional pero mejora el "negro espacial")
+        const starGeometry = new THREE.BufferGeometry();
+        const starMaterial = new THREE.PointsMaterial({ color: 0xffffff, size: 0.05 });
+        const starVertices = [];
+        for (let i = 0; i < 5000; i++) {
+            const x = (Math.random() - 0.5) * 1000;
+            const y = (Math.random() - 0.5) * 1000;
+            const z = (Math.random() - 0.5) * 1000;
+            starVertices.push(x, y, z);
+        }
+        starGeometry.setAttribute('position', new THREE.Float32BufferAttribute(starVertices, 3));
+        const stars = new THREE.Points(starGeometry, starMaterial);
+        scene.add(stars);
+
+        camera.position.z = 15;
+
+        // Controles
+        const controls = new THREE.OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.dampingFactor = 0.05;
+        controls.rotateSpeed = 0.5;
+
+        // Lógica de rotación
+        let isUserInteracting = false;
+        let rotationPaused = false;
+
+        controls.addEventListener('start', () => {
+            isUserInteracting = true;
+            rotationPaused = true;
+        });
+
+        controls.addEventListener('end', () => {
+            isUserInteracting = false;
+            // Podríamos reanudar después de un tiempo, pero el prompt dice "se pausa cuando el usuario interactúa"
+            // Vamos a dejarlo pausado mientras interactúa y reanudar si no hay interacción.
+            setTimeout(() => {
+                if (!isUserInteracting) rotationPaused = false;
+            }, 2000);
+        });
+
+        // Animación
+        function animate() {
+            requestAnimationFrame(animate);
+            
+            if (!rotationPaused) {
+                earth.rotation.y += 0.001;
+            }
+            
+            controls.update();
+            renderer.render(scene, camera);
+        }
+
+        // Resize
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        animate();
+
+        // --- Lógica de Interacción (Fase 2) ---
+        let points = [];
+        let markers = [];
+        let lines = null;
+        let polygonMesh = null;
+        let isPolygonClosed = false;
+        let panelVisible = false;
+
+        const raycaster = new THREE.Raycaster();
+        const mouse = new THREE.Vector2();
+
+        window.addEventListener('click', (event) => {
+            // Evitar clicks si el click fue en el panel
+            if (event.target.closest('#side-panel') || event.target.closest('#header')) return;
+
+            if (!panelVisible) {
+                gsap.to("#side-panel", { x: 0, opacity: 1, duration: 0.8, ease: "power2.out" });
+                panelVisible = true;
+            }
+
+            if (isPolygonClosed) return;
+
+            mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+            mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+            raycaster.setFromCamera(mouse, camera);
+            const intersects = raycaster.intersectObject(earth);
+
+            if (intersects.length > 0) {
+                const point = intersects[0].point;
+                addPoint(point);
+            }
+        });
+
+        function addPoint(point) {
+            points.push(point);
+            
+            // Crear marcador visual
+            const markerGeom = new THREE.SphereGeometry(0.1, 16, 16);
+            const markerMat = new THREE.MeshBasicMaterial({ color: 0xF5A623 });
+            const marker = new THREE.Mesh(markerGeom, markerMat);
+            marker.position.copy(point);
+            scene.add(marker);
+            markers.push(marker);
+
+            updateLines();
+            updateUI();
+        }
+
+        function updateLines() {
+            if (points.length < 2) return;
+
+            if (lines) scene.remove(lines);
+
+            const linePoints = [...points];
+            if (isPolygonClosed) {
+                linePoints.push(points[0]);
+            }
+
+            const geometry = new THREE.BufferGeometry().setFromPoints(linePoints);
+            const material = new THREE.LineBasicMaterial({ 
+                color: 0xF5A623, 
+                transparent: true, 
+                opacity: 0.8,
+                linewidth: 2
+            });
+            lines = new THREE.Line(geometry, material);
+            scene.add(lines);
+        }
+
+        function updateUI() {
+            document.getElementById('point-counter').innerText = `Puntos marcados: ${points.length}`;
+            const btnClose = document.getElementById('btn-close');
+            if (points.length >= 3 && !isPolygonClosed) {
+                btnClose.disabled = false;
+            } else {
+                btnClose.disabled = true;
+            }
+        }
+
+        document.getElementById('btn-close').addEventListener('click', () => {
+            if (points.length < 3) return;
+            isPolygonClosed = true;
+            updateLines();
+            createPolygonFill();
+            document.getElementById('btn-close').style.display = 'none';
+            document.getElementById('btn-analyze').style.display = 'block';
+            updateUI();
+        });
+
+        function createPolygonFill() {
+            // Para simplificar el relleno en una esfera, usaremos un Shape o un Mesh con los puntos
+            // Nota: Un relleno perfecto sobre una esfera requiere geometría esférica, 
+            // pero para este MVP usaremos un polígono plano ligeramente elevado o una aproximación.
+            
+            const shape = new THREE.Shape();
+            // Necesitamos proyectar los puntos 3D a un plano 2D local para el Shape
+            // O usar una técnica de triangulación.
+            // Por simplicidad en este entorno vanilla, crearemos una malla personalizada.
+            
+            const geometry = new THREE.BufferGeometry().setFromPoints(points);
+            // Esto no crea caras automáticamente. Usaremos una técnica simple de abanico si es convexo
+            // o simplemente mostraremos el área.
+            
+            const material = new THREE.MeshBasicMaterial({ 
+                color: 0x4A7C2F, 
+                transparent: true, 
+                opacity: 0.3, 
+                side: THREE.DoubleSide 
+            });
+            
+            // Re-calculamos una geometría de caras (asumiendo polígono simple)
+            const vertices = [];
+            points.forEach(p => vertices.push(p.x, p.y, p.z));
+            
+            const indices = [];
+            for (let i = 1; i < points.length - 1; i++) {
+                indices.push(0, i, i + 1);
+            }
+            
+            const fillGeom = new THREE.BufferGeometry();
+            fillGeom.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
+            fillGeom.setIndex(indices);
+            
+            polygonMesh = new THREE.Mesh(fillGeom, material);
+            scene.add(polygonMesh);
+        }
+
+        // Conversión a GeoJSON
+        function getGeoJSON() {
+            const coords = points.map(p => {
+                const lat = Math.asin(p.y / radius) * (180 / Math.PI);
+                const lng = Math.atan2(p.x, p.z) * (180 / Math.PI);
+                return [lng, lat];
+            });
+            // Cerrar el anillo en GeoJSON
+            if (coords.length > 0) {
+                coords.push([coords[0][0], coords[0][1]]);
+            }
+            return { "coordinates": [coords] };
+        }
+
+        // Botón Analizar
+        document.getElementById('btn-analyze').addEventListener('click', async () => {
+            const geojson = getGeoJSON();
+            
+            // Animación de pulso GSAP
+            const pulseAnim = gsap.to(polygonMesh.scale, {
+                x: 1.05, y: 1.05, z: 1.05,
+                duration: 0.5,
+                repeat: -1,
+                yoyo: true,
+                ease: "sine.inOut"
+            });
+
+            try {
+                const [resRainfall, resTwi] = await Promise.all([
+                    fetch('http://localhost:8000/rainfall/check', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            ...geojson,
+                            "start_date": "2024-01-01",
+                            "end_date": "2024-12-31"
+                        })
+                    }),
+                    fetch('http://localhost:8000/analysis/twi', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ "polygon": geojson })
+                    })
+                ]);
+
+                const dataRainfall = await resRainfall.json();
+                const dataTwi = await resTwi.json();
+
+                pulseAnim.kill();
+                gsap.to(polygonMesh.scale, { x: 1, y: 1, z: 1, duration: 0.3 });
+
+                const event = new CustomEvent('datosRecibidos', { 
+                    detail: { rainfall: dataRainfall, twi: dataTwi } 
+                });
+                window.dispatchEvent(event);
+                console.log("Datos recibidos y evento disparado", event.detail);
+                alert("Análisis completado. Datos recibidos.");
+
+            } catch (error) {
+                console.error("Error en el análisis:", error);
+                pulseAnim.kill();
+                gsap.to(polygonMesh.scale, { x: 1, y: 1, z: 1, duration: 0.3 });
+                alert("Error al conectar con las APIs locales (localhost:8000)");
+            }
+        });
+
+        // Escuchar el evento custom para demostrar que funciona
+        window.addEventListener('datosRecibidos', (e) => {
+            console.log("Evento 'datosRecibidos' capturado:", e.detail);
+        });
+
+    </script>
+</body>
+</html>

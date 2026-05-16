@@ -11,8 +11,3 @@ def init_ee():
 
     ee.Initialize(project="parasol-496423")
     _initialized = True
-
-
-def get_dem():
-    # DEM solo se crea después de init
-    return ee.Image("USGS/SRTMGL1_003")

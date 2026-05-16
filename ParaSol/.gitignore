@@ -47,3 +47,5 @@ subgraph/generated/
 # Python
 __pycache__/
 *.py[cod]
+
+machete.md

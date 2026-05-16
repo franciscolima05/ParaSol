@@ -1,6 +1,7 @@
 import ee
 import math
 
+#TWI = ln(área_acumulada / tan(pendiente))
 def calculate_twi(polygon_geojson):
     coords = polygon_geojson["coordinates"]
     geom = ee.Geometry.Polygon(coords)
