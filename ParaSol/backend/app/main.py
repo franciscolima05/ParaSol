@@ -1,8 +1,6 @@
 from fastapi import FastAPI
-
-import app.core.earth_engine
-
 from app.api.routes.analysis import router as rainfall_router
+from app.core.earth_engine import init_ee
 
 app = FastAPI()
 
@@ -14,5 +12,10 @@ app = FastAPI()
 #BANDS = una capa de información dentro de una imagen
 #RAINFALL BANDS = bandas del dataset => Earth Engine: sumó las 365 imágenes (lluvia total acumulada del año)
 #STATS = estadísticas de la región
+
+@app.on_event("startup")
+def startup_event():
+    init_ee()
+
 
 app.include_router(rainfall_router)

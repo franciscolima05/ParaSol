@@ -12,7 +12,8 @@ Actualmente el sistema permite:
 
 * recibir polígonos geográficos
 * consultar datasets satelitales desde Google Earth Engine
-* calcular lluvia acumulada
+* calcular lluvia acumulada y serie diaria de precipitación
+* calcular TWI (Topographic Wetness Index) para detectar zonas vulnerables a anegamiento
 * obtener estadísticas climáticas sobre una región
 * exponer endpoints HTTP mediante FastAPI
 
@@ -31,7 +32,7 @@ Providers Layer
    ↓
 Google Earth Engine
    ↓
-CHIRPS Dataset
+CHIRPS Dataset / SRTM DEM
 ```
 
 ---
@@ -46,6 +47,7 @@ CHIRPS Dataset
 | Validación de datos | Pydantic            |
 | Logging             | logging             |
 | Dataset climático   | CHIRPS Daily        |
+| Dataset topográfico | USGS SRTM GL1 003   |
 
 ---
 
@@ -62,13 +64,15 @@ app/
 │   └── logger.py
 │
 ├── providers/
-│   └── chirps_provider.py
+│   ├── chirps_provider.py
+│   └── dem_provider.py
 │
 ├── schemas/
 │   └── rainfall.py
 │
 ├── services/
-│   └── rainfall_service.py
+│   ├── rainfall_service.py
+│   └── twi_service.py
 │
 └── main.py
 ```
@@ -81,10 +85,11 @@ app/
 
 Contiene los endpoints HTTP del sistema.
 
-Ejemplo actual:
+Endpoints actuales:
 
 ```text
 POST /rainfall/check
+POST /analysis/twi
 ```
 
 Responsabilidades:
@@ -116,6 +121,7 @@ Capa de acceso a fuentes externas.
 Actualmente:
 
 * CHIRPS rainfall dataset
+* USGS SRTM DEM
 
 Responsabilidad:
 
@@ -130,11 +136,11 @@ Esto permite cambiar datasets sin romper services.
 
 Modelos Pydantic utilizados para validar requests.
 
-Ejemplo actual:
-
 ```python
 class RainfallRequest(BaseModel):
     coordinates: list
+    start_date: str
+    end_date: str
 ```
 
 ---
@@ -148,9 +154,20 @@ Contiene la lógica de negocio y procesamiento geoespacial.
 Responsabilidades:
 
 * construir polígonos GIS
-* consultar datasets climáticos
-* calcular lluvia acumulada
-* generar estadísticas regionales
+* consultar CHIRPS dataset
+* calcular lluvia acumulada total
+* calcular promedio diario de precipitación
+* generar serie diaria de precipitación
+
+### twi_service.py
+
+Responsabilidades:
+
+* construir polígonos GIS
+* consultar DEM (SRTM 30m)
+* calcular pendiente en radianes
+* calcular TWI sobre el polígono
+* retornar promedio y máximo de TWI
 
 ---
 
@@ -168,9 +185,9 @@ Responsabilidades:
 
 # Flujo Actual
 
-## 1. Cliente envía coordenadas
+## Endpoint: POST /rainfall/check
 
-Ejemplo:
+### 1. Cliente envía coordenadas y fechas
 
 ```json
 {
@@ -182,61 +199,112 @@ Ejemplo:
       [-60.326698, -38.178767],
       [-60.326698, -38.198767]
     ]
+  ],
+  "start_date": "2024-01-01",
+  "end_date": "2024-12-31"
+}
+```
+
+### 2. Service construye polígono y consulta CHIRPS
+
+```python
+ee.Geometry.Polygon()
+ee.ImageCollection("UCSB-CHG/CHIRPS/DAILY")
+```
+
+### 3. Backend calcula serie diaria y estadísticas
+
+* una imagen por día → reducción espacial sobre el polígono
+* suma total del período
+* promedio diario
+
+### 4. Backend devuelve estadísticas
+
+```json
+{
+  "total_rainfall_mm": 765.86,
+  "unit": "mm",
+  "period": {
+    "start": "2024-01-01",
+    "end": "2024-12-31"
+  },
+  "series": [
+    {"date": "2024-01-01", "precipitation_mm": 2.3},
+    {"date": "2024-01-02", "precipitation_mm": 0.0}
   ]
 }
 ```
 
 ---
 
-## 2. FastAPI recibe request
+## Endpoint: POST /analysis/twi
 
-Endpoint:
-
-```text
-POST /rainfall/check
-```
-
----
-
-## 3. Service construye polígono
-
-Se genera un objeto GIS real usando:
-
-```python
-ee.Geometry.Polygon()
-```
-
----
-
-## 4. Provider consulta CHIRPS
-
-Dataset utilizado:
-
-```text
-UCSB-CHG/CHIRPS/DAILY
-```
-
----
-
-## 5. Earth Engine calcula lluvia acumulada
-
-Proceso actual:
-
-* selección banda precipitation
-* suma temporal de imágenes
-* reducción espacial sobre el polígono
-
----
-
-## 6. Backend devuelve estadísticas
-
-Ejemplo:
+### 1. Cliente envía polígono
 
 ```json
 {
-  "precipitation": 823.41
+  "polygon": {
+    "coordinates": [
+      [
+        [-60.326698, -38.198767],
+        [-60.306698, -38.198767],
+        [-60.306698, -38.178767],
+        [-60.326698, -38.178767],
+        [-60.326698, -38.198767]
+      ]
+    ]
+  }
 }
 ```
+
+### 2. Service calcula TWI desde DEM SRTM (30m)
+
+* pendiente en radianes
+* acumulación de flujo aproximada por convolución
+* TWI = ln(flow_acc / tan(slope))
+* reducción espacial sobre el polígono
+
+### 3. Backend devuelve estadísticas topográficas
+
+```json
+{
+  "status": "ok",
+  "message": "TWI calculado",
+  "data": {
+    "avg_twi": 8.897949874733417,
+    "max_twi": 11.952496185564904
+  }
+}
+```
+
+### Interpretación del TWI
+
+| TWI       | Interpretación                        |
+| --------- | ------------------------------------- |
+| < 6       | zona alta, drena bien                 |
+| 6 - 9     | zona intermedia                       |
+| > 9       | zona baja, acumula agua               |
+| > 11      | muy vulnerable a anegamiento          |
+
+---
+
+# Datos que ofrece el Backend
+
+## /rainfall/check
+
+| campo                 | qué es                                |
+| --------------------- | ------------------------------------- |
+| `total_rainfall_mm`   | cuánto llovió en todo el período      |
+| `unit`                | unidad de medida (mm)                 |
+| `period`              | el rango de fechas consultado         |
+| `series`              | lluvia real de cada día               |
+
+## /analysis/twi
+
+| campo       | qué es                                          |
+| ----------- | ----------------------------------------------- |
+| `avg_twi`   | humedad topográfica promedio del polígono        |
+| `max_twi`   | zona más vulnerable dentro del polígono         |
 
 ---
 
@@ -247,21 +315,27 @@ El backend utiliza logging centralizado.
 Ejemplo:
 
 ```text
-INFO - Checking rainfall
-INFO - Rainfall calculation completed
+INFO - comprobando la lluvia
+INFO - serie diaria calculada: 365 días
+INFO - calculo de lluvia completado
 ```
 
 ---
 
-# Datos que ofrece el Backend
+# Fundamento Agronómico de los Umbrales
 
-| campo | qué es |
-|---|---|
-| `total_rainfall_mm` | cuánto llovió en todo el período |
-| `avg_daily_rainfall_mm` | promedio por día en ese período |
-| `period` | el rango de fechas consultado |
-| `series` | el detalle día a día |
+Basado en literatura del INTA y AAPRESID para cultivos de la región pampeana:
 
+| Cultivo | Días anegado      | Pérdida estimada              |
+| ------- | ----------------- | ----------------------------- |
+| Soja    | < 2 días          | sin consecuencias             |
+| Soja    | 3 días (temprana) | ~20% rendimiento              |
+| Soja    | 4+ días           | reducción población + rinde   |
+| Soja    | 7+ días           | daño severo observable        |
+| Maíz    | 2-4 días          | sin pérdida apreciable        |
+| Maíz    | > 4 días          | daño según etapa fenológica   |
+
+---
 
 # Estado Actual del Proyecto
 
@@ -269,10 +343,24 @@ Actualmente implementado:
 
 * arquitectura modular FastAPI
 * integración Earth Engine
-* cálculo de lluvia acumulada
-* separación routes/services/providers
+* cálculo de lluvia acumulada y serie diaria (CHIRPS)
+* cálculo de TWI para detección de zonas vulnerables (SRTM)
+* separación routes / services / providers
 * logging centralizado
-* validación básica con Pydantic
+* validación con Pydantic (coordenadas + fechas dinámicas)
+
+---
+
+# Pipeline de Detección de Pérdida de Cosecha
+
+El objetivo del sistema es combinar cuatro fuentes para validar pérdida de cultivo:
+
+```text
+CHIRPS      → cuánto llovió
+DEM + TWI   → dónde se acumularía el agua
+Sentinel-1  → si realmente se acumuló
+NDVI        → si el cultivo se dañó
+```
 
 ---
 
@@ -280,20 +368,16 @@ Actualmente implementado:
 
 ## Corto plazo
 
-* validación avanzada de GeoJSON
+* Sentinel-1 — detección de anegamiento real
+* NDVI — análisis de daño en vegetación (pre vs post evento)
 * manejo de excepciones
-* response models
-* Sentinel-1 fallback
-* NDVI analysis
-* análisis multitemporal
-
----
+* response models con Pydantic
 
 ## Mediano plazo
 
-* motor paramétrico
-* triggers automáticos
-* scoring climático
+* motor paramétrico — combina las cuatro fuentes con umbrales INTA
+* triggers automáticos por cultivo y etapa fenológica
+* scoring climático con niveles de severidad
 * integración blockchain Avalanche
 * smart contract payouts
 
@@ -303,11 +387,12 @@ Actualmente implementado:
 
 El objetivo final es construir un motor paramétrico agrícola híbrido que combine:
 
-* análisis satelital
+* análisis satelital multi-fuente
+* umbrales agronómicos validados (INTA / AAPRESID)
 * automatización climática
-* blockchain
-* pagos automáticos
-* reducción de fraude
+* blockchain Avalanche
+* pagos automáticos escalonados por severidad
+* reducción de fraude mediante hash de polígono y firma de oráculo
 * infraestructura escalable
 
 orientado a seguros agrícolas institucionales sobre Avalanche.
