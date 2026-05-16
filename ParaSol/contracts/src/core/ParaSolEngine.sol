@@ -10,3 +10,7 @@ interface IParaSolPolicy {
     );
     function ownerOf(uint256 tokenId) external view returns (address);
 }
+
+interface IParaSolPool {
+    function executePayout(uint256 poolId, address farmerAddress, uint256 payoutAmount) external;
+}
