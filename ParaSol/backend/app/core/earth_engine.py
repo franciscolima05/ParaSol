@@ -9,7 +9,7 @@ def init_ee():
     if _initialized:
         return
 
-    ee.Initialize(project="test-agro-496400")
+    ee.Initialize(project="parasol-496423")
     _initialized = True
 
 
