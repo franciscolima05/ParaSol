@@ -12,7 +12,8 @@ from ParaSol.ParaSol.backend.src.database import Base
 class UserRole(str, Enum):
     PRODUCER = "producer"        # dueño de campo / agricultor
     ADMIN = "admin"              # admin de la plataforma
-    ORACLE = "oracle"            # cuenta firmante del oráculo
+    ORACLE = "oracle"   
+    DEV = "dev"          # cuenta firmante del oráculo
 
 
 class KYCStatus(str, Enum):

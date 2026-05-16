@@ -51,10 +51,6 @@ class LiquidityPool(Base):
     locked_capital_usdc = Column(Numeric(20, 6), default=0)    # respaldando pólizas activas
     paid_out_usdc = Column(Numeric(20, 6), default=0)          # ya pagado
 
-    # Foco del pool (null = sin restricción)
-    peril_focus = Column(String(40))                       # ver Policy.Peril; null = general
-    region_focus = Column(String(100))                     # "AR-BA" o null
-
     # Backer principal (aseguradora o productor que aporta capital)
     funded_by_user_id = Column(Integer, ForeignKey("users.id"))
 
