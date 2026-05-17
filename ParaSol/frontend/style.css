@@ -660,3 +660,273 @@ footer {
     0%, 100% { opacity: 1; }
     50% { opacity: .5; }
 }
+
+/* ============================================================
+   PARASOL HERO WIDGET
+   ============================================================ */
+.parasol-widget {
+    background: #ffffff;
+    border: 1.5px solid rgba(120, 90, 0, 0.18);
+    border-radius: 1.25rem;
+    padding: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    box-shadow: 0 20px 40px -12px rgba(120, 90, 0, 0.12);
+    position: relative;
+}
+
+/* Header */
+.pw-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+.pw-status {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+.pw-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--secondary);
+    animation: pulse 2s infinite;
+    flex-shrink: 0;
+}
+.pw-status-label {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--secondary);
+}
+.pw-coords {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    color: var(--on-surface-variant);
+    opacity: 0.7;
+}
+
+/* Field picker */
+.pw-field-picker {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+.pw-fp {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 4px 10px;
+    border-radius: 6px;
+    border: 1px solid rgba(120, 90, 0, 0.2);
+    background: transparent;
+    color: var(--on-surface-variant);
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.pw-fp.active {
+    background: var(--primary);
+    border-color: var(--primary);
+    color: #fff;
+}
+.pw-fp:hover:not(.active) {
+    border-color: var(--primary);
+    color: var(--primary);
+}
+.pw-src-tag {
+    margin-left: auto;
+    font-family: var(--font-mono);
+    font-size: 9px;
+    background: rgba(120, 90, 0, 0.08);
+    color: var(--primary);
+    padding: 3px 8px;
+    border-radius: 4px;
+    letter-spacing: 0.04em;
+}
+
+/* Map grid */
+.pw-map-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 3px;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid rgba(120, 90, 0, 0.12);
+    cursor: pointer;
+}
+.pw-cell {
+    aspect-ratio: 1;
+    border-radius: 2px;
+    transition: all 0.2s;
+    opacity: 0.85;
+}
+.pw-cell:hover { opacity: 1; transform: scale(1.06); z-index: 2; }
+.pw-cell.pw-selected {
+    opacity: 1;
+    outline: 2.5px solid var(--primary-container);
+    outline-offset: 1px;
+    z-index: 3;
+    transform: scale(1.1);
+}
+.pw-cell.pw-alert { animation: pw-flash 0.9s 3; }
+@keyframes pw-flash { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+/* Payout toast */
+.pw-toast {
+    display: none;
+    align-items: center;
+    gap: 10px;
+    background: #fff;
+    border: 1.5px solid var(--secondary);
+    border-radius: 10px;
+    padding: 0.65rem 1rem;
+    animation: pw-slide 0.3s ease;
+}
+.pw-toast.pw-toast-show { display: flex; }
+@keyframes pw-slide { from{transform:translateY(-6px);opacity:0} to{transform:translateY(0);opacity:1} }
+.pw-toast-icon {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    background: var(--secondary);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: 700;
+    flex-shrink: 0;
+}
+.pw-toast-text { font-size: 12px; line-height: 1.4; color: var(--on-surface); }
+.pw-toast-text strong { color: var(--secondary); font-size: 13px; }
+.pw-toast-sub { font-size: 10px; color: var(--on-surface-variant); font-family: var(--font-mono); }
+
+/* Metric panels */
+.pw-panels {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+}
+.pw-panel {
+    background: var(--surface-container-low);
+    border: 1px solid rgba(120, 90, 0, 0.1);
+    border-radius: 10px;
+    padding: 0.75rem 1rem;
+}
+.pw-panel-label {
+    font-size: 9px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--on-surface-variant);
+    margin-bottom: 3px;
+}
+.pw-panel-value {
+    font-family: var(--font-headline);
+    font-size: 24px;
+    font-weight: 700;
+    line-height: 1;
+    transition: color 0.4s;
+}
+.pw-val-green { color: var(--secondary); }
+.pw-val-amber { color: var(--primary); }
+.pw-panel-sub {
+    font-size: 10px;
+    color: var(--on-surface-variant);
+    margin-top: 3px;
+    min-height: 14px;
+}
+.pw-mini-bar {
+    display: flex;
+    align-items: flex-end;
+    gap: 2px;
+    height: 26px;
+    margin-top: 6px;
+}
+.pw-bar-seg {
+    flex: 1;
+    border-radius: 2px 2px 0 0;
+    transition: height 0.4s ease, background 0.4s;
+}
+
+/* Trigger row */
+.pw-trigger-row {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    background: var(--surface-container-low);
+    border: 1px solid rgba(120, 90, 0, 0.1);
+    border-radius: 10px;
+    padding: 0.6rem 0.85rem;
+}
+.pw-trig-label { font-size: 10px; color: var(--on-surface-variant); white-space: nowrap; }
+.pw-trig-val {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--on-surface);
+    font-family: var(--font-mono);
+    white-space: nowrap;
+}
+.pw-thr-bar {
+    flex: 1;
+    height: 5px;
+    background: rgba(120, 90, 0, 0.1);
+    border-radius: 3px;
+    position: relative;
+    overflow: visible;
+}
+.pw-thr-fill {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 0.5s ease, background 0.5s;
+    background: var(--secondary);
+}
+.pw-thr-line {
+    position: absolute;
+    top: -4px; bottom: -4px;
+    left: 35%;
+    width: 2px;
+    background: var(--error);
+    border-radius: 1px;
+}
+
+/* Trigger buttons */
+.pw-btn-trigger,
+.pw-btn-ok,
+.pw-btn-inactive {
+    font-size: 10px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    padding: 5px 10px;
+    border-radius: 7px;
+    border: 1.5px solid;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+    font-family: var(--font-main);
+}
+.pw-btn-trigger {
+    background: var(--error);
+    border-color: var(--error);
+    color: #fff;
+    animation: pw-wiggle 0.4s;
+}
+.pw-btn-trigger:hover { opacity: 0.88; }
+@keyframes pw-wiggle { 0%,100%{transform:scale(1)} 50%{transform:scale(1.05)} }
+.pw-btn-ok {
+    background: transparent;
+    border-color: rgba(63, 106, 0, 0.3);
+    color: var(--secondary);
+    cursor: default;
+    opacity: 0.6;
+}
+.pw-btn-inactive {
+    background: transparent;
+    border-color: rgba(120, 90, 0, 0.2);
+    color: var(--on-surface-variant);
+    cursor: default;
+    opacity: 0.5;
+}

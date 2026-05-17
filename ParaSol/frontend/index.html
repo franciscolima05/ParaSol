@@ -45,36 +45,65 @@
                 </div>
             </div>
             <div class="hero-visual">
-                <div class="card-visual shadow-xl">
-                    <div class="card-bg-img"></div>
-                    <div class="card-inner">
-                        <div class="flex justify-between items-center mb-6">
-                            <span class="text-label-sm text-secondary flex items-center gap-2">
-                                <span class="w-3 h-3 rounded-full bg-secondary animate-pulse"></span>
-                                <span data-i18n="hero.sentinel">SENTINEL-2: ACTIVO</span>
-                            </span>
-                            <span class="text-label-sm text-on-surface-variant opacity-70">LAT: -12.453 LON: -44.293</span>
+                <div class="parasol-widget">
+
+                    <!-- Header bar -->
+                    <div class="pw-header">
+                        <div class="pw-status">
+                            <span class="pw-dot"></span>
+                            <span class="pw-status-label" data-i18n="hero.sentinel">SENTINEL-2: ACTIVO</span>
                         </div>
-                        <div class="flex-grow flex flex-col gap-6">
-                            <div class="grid md:grid-cols-2 gap-4">
-                                <div class="bg-surface-container p-4 rounded-xl border border-primary/10">
-                                    <div class="text-label-sm font-bold uppercase text-on-surface-variant mb-1" data-i18n="hero.ndvi">Análisis NDVI</div>
-                                    <div class="text-headline-lg text-secondary font-bold">0.784</div>
-                                </div>
-                                <div class="bg-surface-container p-4 rounded-xl border border-primary/10">
-                                    <div class="text-label-sm font-bold uppercase text-on-surface-variant mb-1" data-i18n="hero.twi">Vulnerabilidad TWI</div>
-                                    <div class="text-headline-lg text-primary font-bold">14.22</div>
-                                </div>
-                            </div>
-                            <div class="ndvi-bar-container">
-                                <div class="ndvi-bar" style="height: 40%;"></div>
-                                <div class="ndvi-bar" style="height: 60%;"></div>
-                                <div class="ndvi-bar full" style="height: 85%;"></div>
-                                <div class="ndvi-bar medium" style="height: 55%;"></div>
-                                <div class="ndvi-bar" style="height: 30%;"></div>
-                            </div>
+                        <span class="pw-coords" id="pw-coords">LAT: -12.453 · LON: -44.293</span>
+                    </div>
+
+                    <!-- Field selector -->
+                    <div class="pw-field-picker">
+                        <button class="pw-fp active" data-field="0">Soja A</button>
+                        <button class="pw-fp" data-field="1">Maíz B</button>
+                        <button class="pw-fp" data-field="2">Trigo C</button>
+                        <span class="pw-src-tag" id="pw-src">Sentinel-2 MSI</span>
+                    </div>
+
+                    <!-- Satellite map grid -->
+                    <div class="pw-map-grid" id="pw-map-grid"></div>
+
+                    <!-- Payout toast -->
+                    <div class="pw-toast" id="pw-toast">
+                        <div class="pw-toast-icon">✓</div>
+                        <div class="pw-toast-text">
+                            <strong id="pw-toast-amount">$4,200 USDC</strong> liquidados en cadena<br>
+                            <span class="pw-toast-sub">Tx: 0x7f3a…b81c · Avalanche C-Chain · <span id="pw-toast-time">2s</span></span>
                         </div>
                     </div>
+
+                    <!-- Metric panels -->
+                    <div class="pw-panels">
+                        <div class="pw-panel">
+                            <div class="pw-panel-label">NDVI · Salud vegetativa</div>
+                            <div class="pw-panel-value pw-val-green" id="pw-ndvi-val">0.784</div>
+                            <div class="pw-panel-sub" id="pw-ndvi-desc">Cobertura óptima</div>
+                            <div class="pw-mini-bar" id="pw-ndvi-bar"></div>
+                        </div>
+                        <div class="pw-panel">
+                            <div class="pw-panel-label">TWI · Riesgo topográfico</div>
+                            <div class="pw-panel-value pw-val-amber" id="pw-twi-val">14.22</div>
+                            <div class="pw-panel-sub" id="pw-twi-desc">Vulnerabilidad media</div>
+                            <div class="pw-mini-bar" id="pw-twi-bar"></div>
+                        </div>
+                    </div>
+
+                    <!-- Trigger row -->
+                    <div class="pw-trigger-row">
+                        <span class="pw-trig-label">NDVI</span>
+                        <span class="pw-trig-val" id="pw-trig-val">0.784</span>
+                        <div class="pw-thr-bar">
+                            <div class="pw-thr-fill" id="pw-thr-fill" style="width:78.4%"></div>
+                            <div class="pw-thr-line"></div>
+                        </div>
+                        <span class="pw-trig-label">LCL 0.35</span>
+                        <button class="pw-btn-ok" id="pw-trig-btn">Sin disparador</button>
+                    </div>
+
                 </div>
             </div>
         </div>
@@ -362,5 +391,107 @@
     </footer>
 
     <script src="i18n.js"></script>
+    <script>
+    (function() {
+        const THRESHOLD = 0.35;
+        const NDVI_COLORS = ['#1a5c00','#2d7a00','#4a9e00','#6dbf2a','#96d45a','#bde690','#dff5b8','#ffd060','#ff9922','#e05500','#b82000'];
+        const fields = [
+            { name:'Soja A',  lat:-12.453, lon:-44.293, src:'Sentinel-2 MSI',  ndvi:.784, twi:14.22, payout:4200,
+              cells:[.72,.68,.81,.75,.70,.64,.83,.79,.85,.74,.55,.71,.88,.82,.69,.60,.77,.84,.80,.73,.65,.59,.76,.83,.71] },
+            { name:'Maíz B',  lat:-14.112, lon:-46.881, src:'CHIRPS · S2',     ndvi:.298, twi:18.91, payout:7800,
+              cells:[.31,.28,.35,.22,.40,.29,.19,.33,.38,.26,.42,.18,.25,.31,.36,.20,.44,.30,.27,.23,.35,.41,.29,.34,.20] },
+            { name:'Trigo C', lat:-35.201, lon:-62.443, src:'Sentinel-1 SAR',  ndvi:.621, twi:11.44, payout:3100,
+              cells:[.58,.62,.55,.67,.61,.59,.70,.54,.63,.66,.57,.69,.60,.52,.65,.71,.56,.68,.64,.53,.62,.58,.67,.55,.61] }
+        ];
+        let selected = 0, selectedCell = 12, toastTimer = null;
+
+        function ndviColor(v) {
+            return NDVI_COLORS[Math.max(0, Math.min(10, Math.round((1 - v) * 10)))];
+        }
+
+        function buildGrid() {
+            const grid = document.getElementById('pw-map-grid');
+            if (!grid) return;
+            grid.innerHTML = '';
+            fields[selected].cells.forEach((v, i) => {
+                const cell = document.createElement('div');
+                cell.className = 'pw-cell' + (i === selectedCell ? ' pw-selected' : '') + (v < THRESHOLD ? ' pw-alert' : '');
+                cell.style.background = ndviColor(v);
+                cell.title = 'NDVI: ' + v.toFixed(2);
+                cell.onclick = () => { selectedCell = i; updatePanels(v, fields[selected].twi + (Math.random()-.5)*2); buildGrid(); };
+                grid.appendChild(cell);
+            });
+        }
+
+        function buildMiniBar(id, norm, type) {
+            const el = document.getElementById(id);
+            if (!el) return;
+            el.innerHTML = '';
+            for (let i = 0; i < 14; i++) {
+                const seg = document.createElement('div');
+                seg.className = 'pw-bar-seg';
+                const h = Math.max(10, Math.min(100, Math.round((norm * .6 + .1 + (Math.random()-.5)*.25) * 100)));
+                seg.style.height = h + '%';
+                seg.style.background = type === 'ndvi'
+                    ? (norm < THRESHOLD ? 'var(--error)' : norm < .5 ? 'var(--primary)' : 'var(--secondary)')
+                    : (norm > .6 ? 'var(--error)' : 'var(--primary)');
+                el.appendChild(seg);
+            }
+        }
+
+        function updatePanels(ndvi, twi) {
+            const f = fields[selected];
+            ndvi = +ndvi.toFixed(3); twi = +twi.toFixed(2);
+            document.getElementById('pw-ndvi-val').textContent = ndvi.toFixed(3);
+            document.getElementById('pw-twi-val').textContent = twi.toFixed(2);
+            document.getElementById('pw-trig-val').textContent = ndvi.toFixed(3);
+            document.getElementById('pw-coords').textContent = 'LAT: ' + f.lat.toFixed(3) + ' · LON: ' + f.lon.toFixed(3);
+            document.getElementById('pw-src').textContent = f.src;
+
+            const fill = document.getElementById('pw-thr-fill');
+            fill.style.width = Math.round(Math.min(100, ndvi * 100)) + '%';
+            fill.style.background = ndvi < THRESHOLD ? 'var(--error)' : 'var(--secondary)';
+
+            document.getElementById('pw-ndvi-val').style.color = ndvi < THRESHOLD ? 'var(--error)' : ndvi < .5 ? 'var(--primary)' : 'var(--secondary)';
+            document.getElementById('pw-ndvi-desc').textContent = ndvi < THRESHOLD ? 'Estrés severo · disparador activo' : ndvi < .5 ? 'Cobertura reducida' : 'Cobertura óptima';
+            document.getElementById('pw-twi-val').style.color = twi > 15 ? 'var(--error)' : 'var(--primary)';
+            document.getElementById('pw-twi-desc').textContent = twi > 15 ? 'Alto riesgo de anegamiento' : 'Vulnerabilidad media';
+
+            const btn = document.getElementById('pw-trig-btn');
+            if (ndvi < THRESHOLD) {
+                btn.className = 'pw-btn-trigger'; btn.textContent = '⚡ Ejecutar pago'; btn.onclick = triggerPayout;
+            } else {
+                btn.className = ndvi < .5 ? 'pw-btn-inactive' : 'pw-btn-ok'; btn.textContent = 'Sin disparador'; btn.onclick = null;
+            }
+            buildMiniBar('pw-ndvi-bar', ndvi, 'ndvi');
+            buildMiniBar('pw-twi-bar', twi / 25, 'twi');
+        }
+
+        function triggerPayout() {
+            const f = fields[selected];
+            const toast = document.getElementById('pw-toast');
+            document.getElementById('pw-toast-amount').textContent = '$' + f.payout.toLocaleString() + ' USDC';
+            toast.classList.add('pw-toast-show');
+            let s = 1;
+            document.getElementById('pw-toast-time').textContent = s + 's';
+            const iv = setInterval(() => { document.getElementById('pw-toast-time').textContent = (++s) + 's'; }, 1000);
+            if (toastTimer) clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => { clearInterval(iv); toast.classList.remove('pw-toast-show'); }, 6000);
+        }
+
+        function switchField(idx) {
+            selected = idx; selectedCell = 12;
+            document.querySelectorAll('.pw-fp').forEach((b, i) => b.classList.toggle('active', i === idx));
+            document.getElementById('pw-toast').classList.remove('pw-toast-show');
+            updatePanels(fields[idx].ndvi, fields[idx].twi);
+            buildGrid();
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.pw-fp').forEach((b, i) => { b.onclick = () => switchField(i); });
+            switchField(0);
+        });
+    })();
+    </script>
 </body>
 </html>
