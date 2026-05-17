@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html class="light" lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <title>ParaSol Terminal - Panel de Aseguradora</title>
+    
+    <!-- Tailwind & Fonts -->
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@600;700;800&family=Work+Sans:wght@400;500&family=JetBrains+Mono:wght@400;500;600;700&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+    
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface": "#F8F9FF",
+                        "primary": "#5b4300",
+                        "secondary": "#3f6900",
+                        "error": "#BA1A1A",
+                        "on-surface": "#121C2A",
+                        "on-surface-variant": "#4d4637",
+                        "surface-container-low": "#EFF4FF",
+                        "surface-container-high": "#E1E2E9",
+                        "outline-variant": "#d1c5b2",
+                        "secondary-container": "#AEF35E",
+                        "on-secondary-container": "#426E00",
+                        "on-primary": "#FFFFFF",
+                        "info": "#185FA5",
+                        "warning": "#BA7517"
+                    },
+                    "fontFamily": {
+                        "headline": ["Manrope"],
+                        "body": ["Work Sans"],
+                        "data": ["JetBrains Mono"]
+                    },
+                },
+            },
+        }
+    </script>
+
+    <style>
+        .font-data { font-family: 'JetBrains Mono', monospace; }
+        
+        #view-insurer {
+            animation: viewEnter 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes viewEnter {
+            from { opacity: 0; transform: translateY(20px); filter: blur(10px); }
+            to { opacity: 1; transform: translateY(0); filter: blur(0); }
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+
+        .bar-track { height: 6px; background: #E1E2E9; border-radius: 99px; overflow: hidden; }
+        .bar-fill { height: 100%; border-radius: 99px; transition: width .8s ease; }
+
+        /* Custom Scrollbar */
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #d1c5b2; border-radius: 10px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #5b4300; }
+    </style>
+</head>
+<body class="bg-surface text-on-surface font-body min-h-screen p-6 pt-24">
+    
+    <header
+        class="fixed top-0 left-0 w-full z-[1001] flex justify-between items-center px-6 h-16 bg-surface border-b border-outline-variant shrink-0">
+        <div class="flex items-center gap-2">
+            <span class="material-symbols-outlined text-primary">agriculture</span>
+            <h1 class="font-headline text-[24px] font-extrabold text-primary tracking-tighter">ParaSol Terminal</h1>
+        </div>
+
+        <div class="hidden md:flex items-center gap-6">
+            <div class="flex flex-col items-end">
+                <span class="font-data text-[11px] font-medium text-on-surface-variant uppercase tracking-wider">
+                    ESTADO_CAMPO
+                </span>
+                <span id="global-status"
+                    class="font-data text-[12px] text-primary font-bold uppercase">
+                    MONITOREO_ACTIVO
+                </span>
+            </div>
+
+            <div class="w-px h-8 bg-outline-variant"></div>
+
+            <div class="flex flex-col items-end">
+                <span class="font-data text-[11px] font-medium text-on-surface-variant uppercase tracking-wider">
+                    COBERTURA_SEGURO
+                </span>
+                <span id="policy-status-top"
+                    class="font-data text-[12px] text-secondary font-bold uppercase">
+                    ACTIVA (100%)
+                </span>
+            </div>
+        </div>
+    </header>
+    <!-- SECCIÓN: PANEL DE ASEGURADORA (INTEGRADA) -->
+    <div id="view-insurer" class="max-w-7xl mx-auto space-y-6">
+        
+        <!-- HEADER BAR -->
+        <div class="flex justify-between items-center border-b border-outline-variant pb-6">
+            <div>
+                <h2 class="font-headline text-[28px] font-extrabold text-primary tracking-tighter leading-none">Panel de Aseguradora</h2>
+                <p class="font-data text-[11px] text-on-surface-variant uppercase tracking-[0.2em] mt-1">
+                    ParaSol · Avalanche Fuji · Temporada 2024
+                </p>
+            </div>
+            <div class="flex gap-3 items-center">
+                <span class="px-3 py-1.5 bg-secondary/10 text-secondary rounded-full font-data font-bold text-[11px] flex items-center gap-2 border border-secondary/20">
+                    <span class="w-2 h-2 rounded-full bg-secondary animate-pulse"></span> Red activa
+                </span>
+                <span class="px-3 py-1.5 bg-info/10 text-info rounded-full font-data font-bold text-[11px] border border-info/20">
+                    Bloque #48,291,044
+                </span>
+            </div>
+        </div>
+
+        <!-- KPI ROW -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div class="glass-card border border-outline-variant rounded-2xl p-5 space-y-4">
+                <div class="font-data text-[10px] text-on-surface-variant uppercase font-bold tracking-widest">Capital total pool</div>
+                <div class="font-data text-[28px] font-bold text-info">250,000 <span class="text-[14px]">USDC</span></div>
+                <div class="space-y-2">
+                    <div class="flex justify-between items-center">
+                        <span class="font-data text-[10px] text-on-surface-variant uppercase">Utilización</span>
+                        <span class="font-data text-[10px] text-info font-bold">55%</span>
+                    </div>
+                    <div class="bar-track"><div class="bar-fill bg-info" style="width: 55%"></div></div>
+                    <p class="font-data text-[10px] text-on-surface-variant">137,700 bloqueado</p>
+                </div>
+            </div>
+
+            <div class="glass-card border border-outline-variant rounded-2xl p-5 space-y-4">
+                <div class="font-data text-[10px] text-on-surface-variant uppercase font-bold tracking-widest">Pólizas activas</div>
+                <div class="font-data text-[28px] font-bold text-on-surface">142 <span class="text-[14px]">en 3 pools</span></div>
+                <div class="flex flex-wrap gap-2">
+                    <span class="px-2 py-1 bg-secondary/10 text-secondary rounded-lg font-data text-[9px] font-bold border border-secondary/20">128 OK</span>
+                    <span class="px-2 py-1 bg-warning/10 text-warning rounded-lg font-data text-[9px] font-bold border border-warning/20">11 ALERTA</span>
+                    <span class="px-2 py-1 bg-error/10 text-error rounded-lg font-data text-[9px] font-bold border border-error/20">3 PAYOUT</span>
+                </div>
+            </div>
+
+            <div class="glass-card border border-outline-variant rounded-2xl p-5 space-y-4">
+                <div class="font-data text-[10px] text-on-surface-variant uppercase font-bold tracking-widest">Superficie cubierta</div>
+                <div class="font-data text-[28px] font-bold text-on-surface">18,450 <span class="text-[14px]">ha</span></div>
+                <div class="space-y-2">
+                    <div class="flex justify-between items-center">
+                        <span class="font-data text-[10px] text-on-surface-variant uppercase">Exposición hídrica</span>
+                        <span class="font-data text-[10px] text-warning font-bold">29%</span>
+                    </div>
+                    <div class="bar-track"><div class="bar-fill bg-warning" style="width: 29%"></div></div>
+                    <p class="font-data text-[10px] text-on-surface-variant">5,370 ha en zona riesgo</p>
+                </div>
+            </div>
+
+            <div class="glass-card border border-outline-variant rounded-2xl p-5 space-y-4">
+                <div class="font-data text-[10px] text-on-surface-variant uppercase font-bold tracking-widest">Payouts emitidos</div>
+                <div class="font-data text-[28px] font-bold text-error">34,200 <span class="text-[14px]">USDC</span></div>
+                <div class="space-y-2">
+                    <div class="flex justify-between items-center">
+                        <span class="font-data text-[10px] text-on-surface-variant uppercase">Siniestralidad</span>
+                        <span class="font-data text-[10px] text-error font-bold">13.7%</span>
+                    </div>
+                    <div class="bar-track"><div class="bar-fill bg-error" style="width: 13.7%"></div></div>
+                    <p class="font-data text-[10px] text-on-surface-variant">Campaña 2024</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- MAIN GRID -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            
+            <!-- TABLA PÓLIZAS -->
+            <div class="lg:col-span-8 glass-card border border-outline-variant rounded-[32px] overflow-hidden shadow-sm">
+                <div class="p-6 border-b border-outline-variant flex justify-between items-center">
+                    <div class="flex items-center gap-2">
+                        <span class="material-symbols-outlined text-primary">description</span>
+                        <h3 class="font-data text-[12px] font-bold text-on-surface uppercase tracking-widest">Pólizas — Exposición Activa</h3>
+                    </div>
+                    <div class="flex gap-2">
+                        <button class="px-3 py-1.5 bg-primary text-white rounded-lg font-data text-[10px] font-bold uppercase">Todas</button>
+                        <button class="px-3 py-1.5 bg-surface-container-high text-on-surface-variant rounded-lg font-data text-[10px] font-bold uppercase hover:bg-outline-variant transition-all">Alertas</button>
+                        <button class="px-3 py-1.5 bg-surface-container-high text-on-surface-variant rounded-lg font-data text-[10px] font-bold uppercase hover:bg-outline-variant transition-all">Payout</button>
+                    </div>
+                </div>
+                <div class="overflow-x-auto custom-scrollbar">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-surface-container-low border-b border-outline-variant">
+                                <th class="p-4 font-data text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">NFT / Lote</th>
+                                <th class="p-4 font-data text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">Productor</th>
+                                <th class="p-4 font-data text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">Cobertura</th>
+                                <th class="p-4 font-data text-[10px] font-bold text-on-surface-variant uppercase tracking-widest text-center">Aneg. %</th>
+                                <th class="p-4 font-data text-[10px] font-bold text-on-surface-variant uppercase tracking-widest text-center">NDVI</th>
+                                <th class="p-4 font-data text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody id="policy-tbody" class="divide-y divide-outline-variant">
+                            <!-- Mock Data -->
+                            <tr class="hover:bg-surface-container-low transition-all cursor-pointer">
+                                <td class="p-4">
+                                    <div class="font-data text-[12px] font-bold text-primary">#1042</div>
+                                    <div class="font-data text-[9px] text-on-surface-variant uppercase">PAMPA_CORE_772</div>
+                                </td>
+                                <td class="p-4 font-body text-[13px] font-medium text-on-surface">Juan M. Rossi</td>
+                                <td class="p-4 font-data text-[12px] font-bold text-on-surface">5,000 USDC</td>
+                                <td class="p-4 font-data text-[12px] text-error font-bold text-center">18.4%</td>
+                                <td class="p-4 font-data text-[12px] text-secondary font-bold text-center">0.74</td>
+                                <td class="p-4">
+                                    <span class="px-2 py-1 bg-error/10 text-error rounded-lg font-data text-[9px] font-bold border border-error/20 uppercase">PAYOUT_ACTIVE</span>
+                                </td>
+                            </tr>
+                            <tr class="hover:bg-surface-container-low transition-all cursor-pointer">
+                                <td class="p-4">
+                                    <div class="font-data text-[12px] font-bold text-primary">#1038</div>
+                                    <div class="font-data text-[9px] text-on-surface-variant uppercase">LOTE_SUR_04</div>
+                                </td>
+                                <td class="p-4 font-body text-[13px] font-medium text-on-surface">Estancia El Sol</td>
+                                <td class="p-4 font-data text-[12px] font-bold text-on-surface">12,500 USDC</td>
+                                <td class="p-4 font-data text-[12px] text-warning font-bold text-center">8.3%</td>
+                                <td class="p-4 font-data text-[12px] text-secondary font-bold text-center">0.62</td>
+                                <td class="p-4">
+                                    <span class="px-2 py-1 bg-warning/10 text-warning rounded-lg font-data text-[9px] font-bold border border-warning/20 uppercase">ALERTA_ACTIVA</span>
+                                </td>
+                            </tr>
+                            <tr class="hover:bg-surface-container-low transition-all cursor-pointer">
+                                <td class="p-4">
+                                    <div class="font-data text-[12px] font-bold text-primary">#1049</div>
+                                    <div class="font-data text-[9px] text-on-surface-variant uppercase">NORTE_FIELD_22</div>
+                                </td>
+                                <td class="p-4 font-body text-[13px] font-medium text-on-surface">AgroPampa S.A.</td>
+                                <td class="p-4 font-data text-[12px] font-bold text-on-surface">3,200 USDC</td>
+                                <td class="p-4 font-data text-[12px] text-secondary font-bold text-center">1.2%</td>
+                                <td class="p-4 font-data text-[12px] text-secondary font-bold text-center">0.81</td>
+                                <td class="p-4">
+                                    <span class="px-2 py-1 bg-secondary/10 text-secondary rounded-lg font-data text-[9px] font-bold border border-secondary/20 uppercase">SIN_EVENTO</span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- PANEL DERECHO -->
+            <div class="lg:col-span-4 space-y-6">
+                <!-- Distribución de Riesgo -->
+                <div class="glass-card border border-outline-variant rounded-[32px] p-6 space-y-6">
+                    <div class="flex items-center gap-2">
+                        <span class="material-symbols-outlined text-primary">pie_chart</span>
+                        <h3 class="font-data text-[12px] font-bold text-on-surface uppercase tracking-widest">Distribución de Riesgo</h3>
+                    </div>
+                    <div class="space-y-4">
+                        <div class="space-y-2">
+                            <div class="flex justify-between items-center">
+                                <span class="font-data text-[11px] text-on-surface-variant">Sin evento</span>
+                                <span class="font-data text-[11px] font-bold text-secondary">90.1%</span>
+                            </div>
+                            <div class="bar-track"><div class="bar-fill bg-secondary" style="width: 90.1%"></div></div>
+                        </div>
+                        <div class="space-y-2">
+                            <div class="flex justify-between items-center">
+                                <span class="font-data text-[11px] text-on-surface-variant">Alerta activa</span>
+                                <span class="font-data text-[11px] font-bold text-warning">7.7%</span>
+                            </div>
+                            <div class="bar-track"><div class="bar-fill bg-warning" style="width: 7.7%"></div></div>
+                        </div>
+                        <div class="space-y-2">
+                            <div class="flex justify-between items-center">
+                                <span class="font-data text-[11px] text-on-surface-variant">Payout activo</span>
+                                <span class="font-data text-[11px] font-bold text-error">2.1%</span>
+                            </div>
+                            <div class="bar-track"><div class="bar-fill bg-error" style="width: 2.1%"></div></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Actividad On-Chain -->
+                <div class="glass-card border border-outline-variant rounded-[32px] p-6 space-y-6">
+                    <div class="flex items-center gap-2">
+                        <span class="material-symbols-outlined text-primary">activity</span>
+                        <h3 class="font-data text-[12px] font-bold text-on-surface uppercase tracking-widest">Actividad On-Chain</h3>
+                    </div>
+                    <div class="space-y-6">
+                        <div class="flex gap-4">
+                            <div class="w-2 h-2 rounded-full bg-error mt-1.5 shrink-0"></div>
+                            <div>
+                                <div class="font-data text-[12px] font-bold text-on-surface">Payout emitido · #1042</div>
+                                <div class="font-data text-[10px] text-on-surface-variant uppercase tracking-wider">+2,000 USDC · hace 2h</div>
+                            </div>
+                        </div>
+                        <div class="flex gap-4">
+                            <div class="w-2 h-2 rounded-full bg-warning mt-1.5 shrink-0"></div>
+                            <div>
+                                <div class="font-data text-[12px] font-bold text-on-surface">Alerta activada · #1038</div>
+                                <div class="font-data text-[10px] text-on-surface-variant uppercase tracking-wider">Aneg. 8.3% · hace 5h</div>
+                            </div>
+                        </div>
+                        <div class="flex gap-4">
+                            <div class="w-2 h-2 rounded-full bg-info mt-1.5 shrink-0"></div>
+                            <div>
+                                <div class="font-data text-[12px] font-bold text-on-surface">Póliza acuñada · #1049</div>
+                                <div class="font-data text-[10px] text-on-surface-variant uppercase tracking-wider">350 USDC prima · ayer</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- BOTTOM ROW -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- Métricas Satelitales Agregadas -->
+            <div class="glass-card border border-outline-variant rounded-[32px] p-6 space-y-6">
+                <div class="flex items-center gap-2">
+                    <span class="material-symbols-outlined text-primary">satellite_alt</span>
+                    <h3 class="font-data text-[12px] font-bold text-on-surface uppercase tracking-widest">Métricas Satelitales — Región Pampa</h3>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="p-4 bg-surface-container-low rounded-2xl border border-outline-variant/50">
+                        <div class="font-data text-[10px] text-on-surface-variant uppercase font-bold mb-1">Lluvia acum. promedio</div>
+                        <div class="font-data text-[20px] font-bold text-on-surface">487 mm</div>
+                        <div class="font-data text-[10px] text-error font-bold">−18% vs. hist.</div>
+                    </div>
+                    <div class="p-4 bg-surface-container-low rounded-2xl border border-outline-variant/50">
+                        <div class="font-data text-[10px] text-on-surface-variant uppercase font-bold mb-1">NDVI mediana región</div>
+                        <div class="font-data text-[20px] font-bold text-on-surface">0.61</div>
+                        <div class="font-data text-[10px] text-secondary font-bold">Normal estacional</div>
+                    </div>
+                    <div class="p-4 bg-surface-container-low rounded-2xl border border-outline-variant/50">
+                        <div class="font-data text-[10px] text-on-surface-variant uppercase font-bold mb-1">Lotes con inundación</div>
+                        <div class="font-data text-[20px] font-bold text-error">14 / 142</div>
+                        <div class="font-data text-[10px] text-on-surface-variant uppercase">>15% área anegada</div>
+                    </div>
+                    <div class="p-4 bg-surface-container-low rounded-2xl border border-outline-variant/50">
+                        <div class="font-data text-[10px] text-on-surface-variant uppercase font-bold mb-1">TWI > 9 (zona baja)</div>
+                        <div class="font-data text-[20px] font-bold text-warning">31%</div>
+                        <div class="font-data text-[10px] text-on-surface-variant uppercase">de superficie total</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Gestión del Pool -->
+            <div class="glass-card border border-outline-variant rounded-[32px] p-6 space-y-6">
+                <div class="flex items-center gap-2">
+                    <span class="material-symbols-outlined text-primary">account_balance</span>
+                    <h3 class="font-data text-[12px] font-bold text-on-surface uppercase tracking-widest">Gestión del Pool de Capital</h3>
+                </div>
+                <div class="space-y-3">
+                    <div class="flex justify-between items-center p-4 bg-surface-container-low rounded-2xl border border-outline-variant/50">
+                        <div>
+                            <div class="font-data text-[10px] text-on-surface-variant uppercase font-bold">Capital disponible</div>
+                            <div class="font-data text-[18px] font-bold text-on-surface">112,300 USDC</div>
+                        </div>
+                        <button class="px-4 py-2 bg-white border border-outline-variant text-on-surface font-data text-[10px] font-bold uppercase rounded-xl hover:bg-surface-container-high transition-all">Simular ↗</button>
+                    </div>
+                    <div class="flex justify-between items-center p-4 bg-surface-container-low rounded-2xl border border-outline-variant/50">
+                        <div>
+                            <div class="font-data text-[10px] text-on-surface-variant uppercase font-bold">Capital bloqueado</div>
+                            <div class="font-data text-[18px] font-bold text-on-surface">137,700 USDC</div>
+                        </div>
+                        <span class="px-3 py-1 bg-warning/10 text-warning rounded-lg font-data text-[11px] font-bold border border-warning/20">55.1%</span>
+                    </div>
+                    <div class="flex justify-between items-center p-4 bg-surface-container-low rounded-2xl border border-outline-variant/50">
+                        <div>
+                            <div class="font-data text-[10px] text-on-surface-variant uppercase font-bold">Primas cobradas</div>
+                            <div class="font-data text-[18px] font-bold text-secondary">63,900 USDC</div>
+                        </div>
+                        <span class="px-3 py-1 bg-secondary/10 text-secondary rounded-lg font-data text-[11px] font-bold border border-secondary/20">Campaña 2024</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>
