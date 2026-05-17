@@ -56,8 +56,14 @@ El backend (`backend/`) es un servicio geoespacial desarrollado en **Python** ut
 
 ## 4. Conclusión
 
-El proyecto ParaSol presenta una solución robusta y bien estructurada para seguros agrícolas paramétricos, integrando tecnologías de blockchain (Avalanche, Solidity), procesamiento geoespacial (Python, FastAPI, Google Earth Engine) y una interfaz de usuario moderna (Next.js, TypeScript). La modularidad de la arquitectura, con una clara separación entre contratos, backend y frontend, facilita el desarrollo y el mantenimiento. El uso de herramientas como Foundry para smart contracts y FastAPI para el backend demuestra una elección de tecnologías eficientes y escalables. El enfoque en datos geoespaciales para activar seguros es una aplicación innovadora de la tecnología blockchain en el sector agrícola.
+El proyecto ParaSol presenta una solución robusta y bien estructurada para seguros agrícolas paramétricos, integrando tecnologías de blockchain (Avalanche, Solidity), procesamiento geoespacial (Python, FastAPI, Google Earth Engine) y una interfaz de usuario moderna . La modularidad de la arquitectura, con una clara separación entre contratos, backend y frontend, facilita el desarrollo y el mantenimiento. El uso de herramientas como Foundry para smart contracts y FastAPI para el backend demuestra una elección de tecnologías eficientes y escalables. El enfoque en datos geoespaciales para activar seguros es una aplicación innovadora de la tecnología blockchain en el sector agrícola.
 
-## Demostración de Backend y Blockchain
+## Spich del ParaSol
 
-[![Demo ParaSol](https://img.youtube.com/vi/TU_VIDEO_ID/maxresdefault.jpg)](https://www.youtube.com/watch?v=ly-qBHOm1_U)
+[![Spich ParaSol](https://img.youtube.com/vi/TU_VIDEO_ID/maxresdefault.jpg)](https://www.youtube.com/watch?v=ly-qBHOm1_U)
+
+## Demo del ParaSol (Back,Front,Blockchain)
+
+[![Demo ParaSol](https://img.youtube.com/vi/TU_VIDEO_ID/maxresdefault.jpg)](https://youtu.be/S7BvxCOp_7I)
+
+
