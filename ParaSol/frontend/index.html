@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>PARASOL | Inteligencia Agro-Climática</title>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&family=Work+Sans:wght@300..700&family=JetBrains+Mono:wght@400;500&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="image.png">
+</head>
+<body>
+    <!-- Header Component -->
+    <header>
+        <nav class="container">
+            <div class="flex items-center gap-2">
+                <img alt="ParaSol Logo" class="h-10 w-auto" src="icono-sin-fondo.png"/>
+                <span class="text-headline-lg font-bold text-primary">PARASOL</span>
+            </div>
+            <div class="nav-links">
+                <a class="nav-link" href="#" data-i18n="nav.satellite">Inteligencia Satelital</a>
+                <a class="nav-link"  href="#motor-parametrico"  data-i18n="nav.contracts">Motor Paramétrico</a>
+                <a class="nav-link" href="#gestores-de-riesgo" data-i18n="nav.dashboard">Panel de Riesgos</a>
+                <a class="nav-link" href="#nuestro-camino" data-i18n="nav.docs">Referencia API</a>
+            </div>
+            <div class="flex items-center">
+                <button class="btn-primary" data-i18n="nav.launch">Acceder a Plataforma</button>
+                <button id="lang-toggle">EN / ES</button>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container hero-grid">
+            <div class="hero-content">
+                <h1 class="headline-xl" data-i18n="hero.title">
+                    Potenciando Aseguradoras con <span class="text-primary-container">Inteligencia Paramétrica</span>
+                </h1>
+                <p class="text-body-md text-on-surface-variant mb-10 max-w-xl" data-i18n="hero.subtitle">
+                    ParaSol proporciona a las aseguradoras datos satelitales de alta fidelidad y automatización blockchain para agilizar reclamos, eliminar costos de ajuste y escalar productos de resiliencia climática.
+                </p>
+                <div class="flex flex-wrap gap-4">
+                    <button class="btn-primary btn-hero-primary" data-i18n="hero.demo">Agendar Demo B2B</button>
+                    <button class="btn-outline" data-i18n="hero.infra">Stack Técnico</button>
+                </div>
+            </div>
+            <div class="hero-visual">
+                <div class="card-visual shadow-xl">
+                    <div class="card-bg-img"></div>
+                    <div class="card-inner">
+                        <div class="flex justify-between items-center mb-6">
+                            <span class="text-label-sm text-secondary flex items-center gap-2">
+                                <span class="w-3 h-3 rounded-full bg-secondary animate-pulse"></span>
+                                <span data-i18n="hero.sentinel">SENTINEL-2: ACTIVO</span>
+                            </span>
+                            <span class="text-label-sm text-on-surface-variant opacity-70">LAT: -12.453 LON: -44.293</span>
+                        </div>
+                        <div class="flex-grow flex flex-col gap-6">
+                            <div class="grid md:grid-cols-2 gap-4">
+                                <div class="bg-surface-container p-4 rounded-xl border border-primary/10">
+                                    <div class="text-label-sm font-bold uppercase text-on-surface-variant mb-1" data-i18n="hero.ndvi">Análisis NDVI</div>
+                                    <div class="text-headline-lg text-secondary font-bold">0.784</div>
+                                </div>
+                                <div class="bg-surface-container p-4 rounded-xl border border-primary/10">
+                                    <div class="text-label-sm font-bold uppercase text-on-surface-variant mb-1" data-i18n="hero.twi">Vulnerabilidad TWI</div>
+                                    <div class="text-headline-lg text-primary font-bold">14.22</div>
+                                </div>
+                            </div>
+                            <div class="ndvi-bar-container">
+                                <div class="ndvi-bar" style="height: 40%;"></div>
+                                <div class="ndvi-bar" style="height: 60%;"></div>
+                                <div class="ndvi-bar full" style="height: 85%;"></div>
+                                <div class="ndvi-bar medium" style="height: 55%;"></div>
+                                <div class="ndvi-bar" style="height: 30%;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="ambient-glow"></div>
+    </section>
+
+    <!-- Problem Section -->
+    <section class="container">
+        <div class="mb-16 text-center  mx-auto">
+            <h2 class="text-headline-xl mb-4" data-i18n="problem.title">Optimizando la <span class="text-primary">Cadena de Valor del Seguro</span></h2>
+            <p class="text-on-surface-variant text-body-md" data-i18n="problem.subtitle">Ayudamos a las aseguradoras a superar cuellos de botella operativos mediante disparadores de datos deterministas que reemplazan las inspecciones manuales con precisión orbital.</p>
+        </div>
+        <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-gutter">
+            <div class="climate-card">
+                <span class="material-symbols-outlined text-4xl mb-6 text-primary opacity-80">speed</span>
+                <h3 class="text-xl font-bold mb-4" data-i18n="problem.bureaucracy.title">Eficiencia Operativa</h3>
+                <p class="text-on-surface-variant text-label-sm" data-i18n="problem.bureaucracy.desc">Automatice flujos administrativos para centrar recursos en la suscripción y el crecimiento de la cartera.</p>
+            </div>
+            <div class="climate-card">
+                <span class="material-symbols-outlined text-4xl mb-6 text-primary opacity-80">bolt</span>
+                <h3 class="text-xl font-bold mb-4" data-i18n="problem.delays.title">Liquidación Instantánea</h3>
+                <p class="text-on-surface-variant text-label-sm" data-i18n="problem.delays.desc">Reduzca los ciclos de pago de meses a horas, mejorando la confianza y retención del asegurado.</p>
+            </div>
+            <div class="climate-card">
+                <span class="material-symbols-outlined text-4xl mb-6 text-primary opacity-80">verified</span>
+                <h3 class="text-xl font-bold mb-4" data-i18n="problem.opaque.title">Datos Deterministas</h3>
+                <p class="text-on-surface-variant text-label-sm" data-i18n="problem.opaque.desc">Reemplace evaluaciones subjetivas con evidencia satelital inmutable e índices climáticos verificables.</p>
+            </div>
+            <div class="climate-card">
+                <span class="material-symbols-outlined text-4xl mb-6 text-primary opacity-80">trending_down</span>
+                <h3 class="text-xl font-bold mb-4" data-i18n="problem.errors.title">Reducción de Costos</h3>
+                <p class="text-on-surface-variant text-label-sm" data-i18n="problem.errors.desc">Elimine costosas inspecciones físicas de campo mediante telemetría continua de teledetección.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pipeline Section -->
+    <section class="bg-surface-container-low" id="motor-parametrico">
+        <div class="container">
+            <div class="mb-16 text-center">
+                <span class="text-label-sm text-primary font-bold uppercase tracking-widest" data-i18n="engine.label">El Motor de Inteligencia</span>
+                <h2 class="text-headline-xl mt-4" data-i18n="engine.title">Pipeline Orbital Multi-Fuente</h2>
+            </div>
+            <div class="pipeline-grid">
+                <div class="connective-line"></div>
+                <div class="climate-card flex-1 z-10 flex flex-col items-center text-center">
+                    <div class="icon-circle">
+                        <span class="material-symbols-outlined text-primary text-3xl">satellite_alt</span>
+                    </div>
+                    <h4 class="font-bold text-lg mb-2" data-i18n="engine.ingestion.title">Ingesta Satelital</h4>
+                    <p class="text-label-sm text-on-surface-variant" data-i18n="engine.ingestion.desc">Imágenes multiespectrales diarias de Sentinel-1 (SAR), Sentinel-2 , CHIRPS y NDVI. </p>
+                </div>
+                <div class="climate-card flex-1 z-10 flex flex-col items-center text-center">
+                    <div class="icon-circle">
+                        <span class="material-symbols-outlined text-primary text-3xl">functions</span>
+                    </div>
+                    <h4 class="font-bold text-lg mb-2" data-i18n="engine.ndvi.title">Salud Vegetativa</h4>
+                    <code class="text-label-sm text-secondary bg-secondary-container/30 px-3 py-2 rounded mt-2">Sentinel-2 MSI</code>
+                </div>
+                <div class="climate-card flex-1 z-10 flex flex-col items-center text-center">
+                    <div class="icon-circle">
+                        <span class="material-symbols-outlined text-primary text-3xl">water_drop</span>
+                    </div>
+                    <h4 class="font-bold text-lg mb-2" data-i18n="engine.climate.title">Riesgo Topográfico</h4>
+                    <code class="text-label-sm text-secondary bg-secondary-container/30 px-3 py-2 rounded mt-2">SRTM 30m DEM</code>
+                </div>
+                <div class="climate-card flex-1 z-10 flex flex-col items-center text-center" style="border: 2px solid var(--primary);">
+                    <div class="icon-circle primary">
+                        <span class="material-symbols-outlined text-3xl">token</span>
+                    </div>
+                    <h4 class="font-bold text-lg mb-2" data-i18n="engine.smart.title">Pagos Automatizados</h4>
+                    <p class="text-label-sm text-on-surface-variant font-medium" data-i18n="engine.smart.desc">Liquidación segura mediante contratos inteligentes de Avalanche y oráculos personalizados.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Architecture -->
+    <section class="container">
+        <div class="grid lg:grid-cols-2 gap-20 items-center">
+            <div>
+                <div class="arch-card">
+                    <div class="arch-gradient"></div>
+                    <div class="flex flex-col gap-8 relative z-10">
+                        <div class="flex items-center gap-4">
+                            <div class="arch-box">Frontend</div>
+                            <div class="arch-line dashed"></div>
+                            <div class="arch-box">API Gateway</div>
+                        </div>
+                        <div class="flex justify-center">
+                            <div class="arch-v-line"></div>
+                        </div>
+                        <div class="flex items-center gap-4">
+                            <div class="arch-box arch-box-large" style="background-color: rgba(120, 90, 0, 0.1); border-color: rgba(120, 90, 0, 0.3);">Earth Engine Co</div>
+                            <div class="arch-line"></div>
+                            <div class="arch-box arch-box-large" style="background-color: rgba(63, 106, 0, 0.1); border-color: rgba(63, 106, 0, 0.3); color: var(--secondary);">Avalanche Subnet</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex flex-wrap gap-2 mt-10">
+                    <span class="tag">Solidity</span>
+                    <span class="tag">Python (FastAPI)</span>
+                    <span class="tag">GEE API</span>
+                    <span class="tag">Sentinel-2</span>
+                </div>
+            </div>
+            <div>
+                <h2 class="text-headline-xl mb-6" data-i18n="integrations.title">Integraciones <span class="text-primary">Críticas</span></h2>
+                <p class="text-on-surface-variant text-body-md mb-8" data-i18n="integrations.subtitle">Nuestro backend geoespacial procesa petabytes de datos orbitales para entregar la verdad ambiental directamente a su infraestructura de seguros.</p>
+                <ul class="flex flex-col gap-6" style="list-style: none;">
+                    <li class="flex items-start gap-4">
+                        <span class="material-symbols-outlined text-secondary text-2xl">verified</span>
+                        <div>
+                            <h5 class="font-bold text-on-surface text-lg" data-i18n="integrations.telemetry.title">Detección Sentinel-1 SAR</h5>
+                            <p class="text-label-sm text-on-surface-variant" data-i18n="integrations.telemetry.desc">Detección de inundaciones basada en radar que penetra la cobertura de nubes, asegurando monitoreo 24/7 de zonas anegadas.</p>
+                        </div>
+                    </li>
+                    <li class="flex items-start gap-4">
+                        <span class="material-symbols-outlined text-secondary text-2xl">verified</span>
+                        <div>
+                            <h5 class="font-bold text-on-surface text-lg" data-i18n="integrations.oracles.title">Modelos de Riesgo Propios</h5>
+                            <p class="text-label-sm text-on-surface-variant" data-i18n="integrations.oracles.desc">Series temporales de TWI (Índice de Humedad Topográfica) y NDVI para evaluar daños con precisión sub-métrica.</p>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <!-- Audience Cards -->
+    <section class="bg-white" id="gestores-de-riesgo">
+        <div class="container">
+            <h2 class="text-headline-xl mb-16 text-center" data-i18n="audience.title">Soluciones Escalables para <span class="text-primary">Gestores de Riesgo</span></h2>
+            <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-gutter">
+                <div class="climate-card flex flex-col justify-between" style="min-height: 320px;">
+                    <div>
+                        <h4 class="text-xl font-bold mb-4" data-i18n="audience.insurers.title">Reaseguradoras</h4>
+                        <p class="text-on-surface-variant text-label-sm" data-i18n="audience.insurers.desc">Acceda a datos de pérdidas transparentes en tiempo real para optimizar la asignación de capital y mecanismos de transferencia de riesgo.</p>
+                    </div>
+                    <span class="material-symbols-outlined text-primary text-4xl">corporate_fare</span>
+                </div>
+                <div class="climate-card flex flex-col justify-between" style="min-height: 320px; background-color: rgba(120, 90, 0, 0.05); border: 2px solid rgba(120, 90, 0, 0.2);">
+                    <div>
+                        <h4 class="text-xl font-bold mb-4" data-i18n="audience.farmers.title">Aseguradoras Primarias</h4>
+                        <p class="text-on-surface-variant text-label-sm font-medium" data-i18n="audience.farmers.desc">Lance productos paramétricos competitivos con cero gastos de ajuste de pérdidas (LAE).</p>
+                    </div>
+                    <span class="material-symbols-outlined text-primary text-4xl">agriculture</span>
+                </div>
+                <div class="climate-card flex flex-col justify-between" style="min-height: 320px;">
+                    <div>
+                        <h4 class="text-xl font-bold mb-4" data-i18n="audience.landowners.title">Agro-Corporativos</h4>
+                        <p class="text-on-surface-variant text-label-sm" data-i18n="audience.landowners.desc">Proteja operaciones a gran escala con cobertura climática de grado institucional y recuperación automatizada.</p>
+                    </div>
+                    <span class="material-symbols-outlined text-primary text-4xl">landscape</span>
+                </div>
+                <div class="climate-card flex flex-col justify-between" style="min-height: 320px;">
+                    <div>
+                        <h4 class="text-xl font-bold mb-4" data-i18n="audience.governments.title">Sector Público</h4>
+                        <p class="text-on-surface-variant text-label-sm" data-i18n="audience.governments.desc">Despliegue programas soberanos de alivio de desastres con total transparencia y cero fugas administrativas.</p>
+                    </div>
+                    <span class="material-symbols-outlined text-primary text-4xl">gavel</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Code Section -->
+    <section class="container">
+        <div class="grid lg:grid-cols-12 gap-gutter items-center">
+            <div class="lg:col-span-5">
+                <h2 class="text-headline-xl mb-8" data-i18n="velocity.title">Velocidad de <span class="text-secondary">Liquidación</span></h2>
+                <div class="grid md:grid-cols-2 gap-8 mb-10">
+                    <div>
+                        <div class="text-4xl font-bold text-primary">72h</div>
+                        <div class="text-label-sm uppercase font-bold text-on-surface-variant tracking-widest mt-2" data-i18n="velocity.avg">Liquidación Promedio</div>
+                    </div>
+                    <div>
+                        <div class="text-4xl font-bold text-primary">$0.02</div>
+                        <div class="text-label-sm uppercase font-bold text-on-surface-variant tracking-widest mt-2" data-i18n="velocity.fee">Tarifa de Red</div>
+                    </div>
+                </div>
+                <button class="btn-primary w-full py-4" data-i18n="velocity.docs">Documentación para Desarrolladores</button>
+            </div>
+            <div class="lg:col-span-7">
+                <div class="code-container">
+                    <div class="code-header">
+                        <div class="code-dots">
+                            <div class="dot red"></div>
+                            <div class="dot yellow"></div>
+                            <div class="dot green"></div>
+                        </div>
+                        <span class="text-label-sm" style="color: #94a3b8; font-size: 10px;">ParaSolTrigger.sol</span>
+                    </div>
+                    <div class="code-body">
+<pre><code><span style="color: #c084fc;">contract</span> <span style="color: #facc15;">ParaSolInsurance</span> {
+    <span style="color: #60a5fa;">uint256</span> <span style="color: #ffffff;">public</span> rainfallThreshold;
+    <span style="color: #60a5fa;">mapping</span>(uint256 => bool) <span style="color: #ffffff;">public</span> fieldStatus;
+
+    <span style="color: #64748b;">// Automated Trigger from Satellite Oracle</span>
+    <span style="color: #c084fc;">function</span> <span style="color: #facc15;">executePayout</span>(<span style="color: #60a5fa;">uint256</span> _fieldID, <span style="color: #60a5fa;">uint256</span> _measuredNDVI) <span style="color: #ffffff;">external</span> {
+        <span style="color: #60a5fa;">require</span>(msg.sender == ORACLE_ADDRESS, <span style="color: #ef4444;">"Unauthorized"</span>);
+        <span style="color: #c084fc;">if</span> (_measuredNDVI < lowerControlLimit) {
+            _triggerInstantSettlement(_fieldID);
+        }
+    }
+
+    <span style="color: #c084fc;">function</span> <span style="color: #facc15;">_triggerInstantSettlement</span>(<span style="color: #60a5fa;">uint256</span> _fieldID) <span style="color: #ffffff;">internal</span> {
+        <span style="color: #64748b;">// Logic for USDC transfer...</span>
+    }
+}</code></pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Roadmap -->
+    <section class="bg-surface-container-low" id="nuestro-camino">
+        <div class="container">
+            <h2 class="text-headline-xl mb-16" data-i18n="roadmap.title">El Camino a Seguir</h2>
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-y-12 gap-x-12" style="gap: 15px;">
+                <div class="roadmap-item">
+                    <div class="roadmap-dot"></div>
+                    <span class="text-label-sm font-bold text-primary uppercase tracking-tighter mb-2 block">Phase 01</span>
+                    <h5 class="font-bold text-lg mb-3" data-i18n="roadmap.p1.title">Infraestructura Alpha</h5>
+                    <p class="text-label-sm text-on-surface-variant" data-i18n="roadmap.p1.desc">Integración completa de las API de GEE con las redes de prueba de Avalanche C-Chain para indexación automatizada.</p>
+                </div>
+                <div class="roadmap-item">
+                    <div class="roadmap-dot"></div>
+                    <span class="text-label-sm font-bold text-primary uppercase tracking-tighter mb-2 block">Phase 02</span>
+                    <h5 class="font-bold text-lg mb-3" data-i18n="roadmap.p2.title">Lanzamiento Piloto LATAM</h5>
+                    <p class="text-label-sm text-on-surface-variant" data-i18n="roadmap.p2.desc">Pruebas de campo directas con productores de soja en Mato Grosso y cinturones de maíz en Argentina.</p>
+                </div>
+                <div class="roadmap-item inactive">
+                    <div class="roadmap-dot"></div>
+                    <span class="text-label-sm font-bold text-on-surface-variant opacity-70 uppercase tracking-tighter mb-2 block">Phase 03</span>
+                    <h5 class="font-bold text-lg mb-3" data-i18n="roadmap.p3.title">Motor ML Actuarial</h5>
+                    <p class="text-label-sm text-on-surface-variant" data-i18n="roadmap.p3.desc">Despliegue de modelos de precios dinámicos que ajustan las primas basadas en pronósticos estacionales de IA.</p>
+                </div>
+                <div class="roadmap-item inactive">
+                    <div class="roadmap-dot"></div>
+                    <span class="text-label-sm font-bold text-on-surface-variant opacity-70 uppercase tracking-tighter mb-2 block">Phase 04</span>
+                    <h5 class="font-bold text-lg mb-3" data-i18n="roadmap.p4.title">Pools de Liquidez</h5>
+                    <p class="text-label-sm text-on-surface-variant" data-i18n="roadmap.p4.desc">Permitir que el capital institucional proporcione liquidez de reaseguro descentralizada a través de tokens de bóveda.</p>
+                </div>
+                <div class="roadmap-item inactive">
+                    <div class="roadmap-dot"></div>
+                    <span class="text-label-sm font-bold text-on-surface-variant opacity-70 uppercase tracking-tighter mb-2 block">Phase 05</span>
+                    <h5 class="font-bold text-lg mb-3" data-i18n="roadmap.p5.title">Expansión Africana</h5>
+                    <p class="text-label-sm text-on-surface-variant" data-i18n="roadmap.p5.desc">Despliegue de microseguros para pequeños agricultores en regiones áridas de África Oriental.</p>
+                </div>
+                <div class="roadmap-item inactive">
+                    <div class="roadmap-dot"></div>
+                    <span class="text-label-sm font-bold text-on-surface-variant opacity-70 uppercase tracking-tighter mb-2 block">Phase 06</span>
+                    <h5 class="font-bold text-lg mb-3" data-i18n="roadmap.p6.title">Subred ParaSol</h5>
+                    <p class="text-label-sm text-on-surface-variant" data-i18n="roadmap.p6.desc">Transición a una subred dedicada de Avalanche para rendimiento soberano y cumplimiento.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Final CTA -->
+    <section class="text-center relative overflow-hidden py-32">
+        <div class="container relative z-10">
+            <h2 class="text-headline-xl mb-8 font-light italic text-on-surface" data-i18n="cta.title">"Estandarizando la red para las personas mas comprometidas con nuestro suelo."</h2>
+            <p class="text-body-md text-on-surface-variant mb-12" data-i18n="cta.subtitle">La transición del seguro reactivo al predictivo está aquí. Únase a ParaSol en la construcción de la infraestructura climática del futuro.</p>
+            <button class="btn-primary btn-large" data-i18n="cta.button">Asóciese con ParaSol</button>
+        </div>
+        <div class="ambient-glow" style="top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(12deg); width: 800px; height: 400px; background-color: rgba(255, 223, 154, 0.2); filter: blur(100px);"></div>
+    </section>
+
+    <!-- Footer Component -->
+ <footer>
+        <div class="container footer-content" style="flex-direction: column; text-align: center;">
+            <div class="flex flex-col items-center gap-4">
+                <div class="flex items-center justify-center gap-2">
+                    <img alt="ParaSol" class="h-8 w-auto" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDZ8x4CQQB68ko2_b3RDOVu0-PnGDAodGjQfUAcdPWsJuh6W59OnGAEzTtCnaAMDibTfYmyOcVxD-YxHwIgrd3iSNs6qbrvK2NFOc8oCAKPDt7aW4QYbQfEhsCRCzJspfzXfjb9-fQtjpQKksla787VYloNzqw4HvPGpZuraY7EHLMYzUUehf7W87X7LCfxtlG7hP1EsxwNEeI6qHQygRvgq08BruiZkt1g7wbBG3IBrs-f_agTkZMRkT473KPVmNrc4J6YMFcoW38k"/>
+                    <span class="text-headline-lg font-semibold text-primary">ParaSol</span>
+                </div>
+                <p class="text-label-sm text-on-surface-variant" data-i18n="footer.copy">
+                    © 2026 ParaSol. Protegiendo el futuro de la agricultura global.
+                </p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="i18n.js"></script>
+</body>
+</html>
