@@ -3,8 +3,8 @@ from web3 import AsyncWeb3 #pip install web3
 from web3.providers import AsyncHTTPProvider
 
 # 1. Configuración de Entorno (Reemplazar con sus datos de Fuji) //hardcodeado por ahora
-RPC_URL = "http://127.0.0.1:8545" 
-CONTRACT_ADDRESS = "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512"
+RPC_URL = "https://api.avax-test.network/ext/bc/C/rpc" 
+CONTRACT_ADDRESS = "0xd5EE5028332cF8Bf20cdE0eF914268E98a3517c4"
 
 # Mini-ABI: no necesita meter todo el JSON gigante, con pasarle la estructura 
 # del evento y de la función de consulta ya puede operar este módulo.
