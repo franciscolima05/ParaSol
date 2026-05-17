@@ -1,0 +1,52 @@
+    
+        /* Estilos Agro-Tech Personalizados */
+        .font-data { font-family: 'JetBrains Mono', monospace; }
+        
+        #view-policy {
+            animation: viewEnter 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes viewEnter {
+            from { opacity: 0; transform: translateY(20px); filter: blur(10px); }
+            to { opacity: 1; transform: translateY(0); filter: blur(0); }
+        }
+
+        /* Barra de progreso con efecto de fibra de carbono y rayas animadas */
+        .progress-bar-animated {
+            background-size: 30px 30px;
+            background-image: linear-gradient(
+                45deg,
+                rgba(255, 255, 255, 0.1) 25%,
+                transparent 25%,
+                transparent 50%,
+                rgba(255, 255, 255, 0.1) 50%,
+                rgba(255, 255, 255, 0.1) 75%,
+                transparent 75%,
+                transparent
+            );
+            animation: barStripes 2s linear infinite;
+        }
+
+        @keyframes barStripes {
+            from { background-position: 0 0; }
+            to { background-position: 60px 0; }
+        }
+
+        /* Alerta de Siniestro (Pulse Rojo) */
+        .alert-pulse {
+            animation: alertPulse 2s infinite;
+        }
+
+        @keyframes alertPulse {
+            0% { box-shadow: 0 0 0 0 rgba(186, 26, 26, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(186, 26, 26, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(186, 26, 26, 0); }
+        }
+
+        /* Glassmorphism sutil */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+    

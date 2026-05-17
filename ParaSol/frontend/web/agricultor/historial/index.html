@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html class="light" lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <title>ParaSol Terminal - Mi Historial</title>
+    <link rel="stylesheet" href="style.css">
+
+    <!-- Tailwind & Fonts -->
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@600;700;800&family=Work+Sans:wght@400;500&family=JetBrains+Mono:wght@400;500;600;700&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        surface: "#F8F9FF",
+                        primary: "#5b4300",
+                        secondary: "#3f6900",
+                        error: "#BA1A1A",
+                        "on-surface": "#121C2A",
+                        "on-surface-variant": "#4d4637",
+                        "surface-container-low": "#EFF4FF",
+                        "surface-container-high": "#E1E2E9",
+                        "outline-variant": "#d1c5b2",
+                        "secondary-container": "#AEF35E",
+                        "on-secondary-container": "#426E00",
+                        "on-primary": "#FFFFFF"
+                    },
+                    fontFamily: {
+                        headline: ["Manrope"],
+                        body: ["Work Sans"],
+                        data: ["JetBrains Mono"]
+                    }
+                }
+            }
+        }
+    </script>
+
+
+</head>
+
+<body class="bg-surface text-on-surface font-body min-h-screen">
+
+<!-- HEADER -->
+<header class="fixed top-0 left-0 w-full z-[1001] h-16 flex items-center justify-between px-6 bg-surface border-b border-outline-variant">
+    <div class="flex items-center gap-2">
+        <span class="material-symbols-outlined text-primary">agriculture</span>
+        <h1 class="font-headline text-[24px] font-extrabold text-primary">ParaSol Terminal</h1>
+    </div>
+
+    <div class="hidden md:flex items-center gap-6">
+        <div class="flex flex-col items-end">
+            <span class="font-data text-[11px] text-on-surface-variant uppercase">ESTADO</span>
+            <span class="font-data text-[12px] text-primary font-bold">MONITOREO</span>
+        </div>
+    </div>
+</header>
+
+<!-- LAYOUT GENERAL -->
+<div class="pt-16 flex min-h-screen">
+
+    <!-- SIDEBAR -->
+    <aside class="hidden md:flex flex-col w-64 shrink-0 bg-surface-container-low border-r border-outline-variant p-4">
+        <nav class="flex-1 space-y-1">
+
+            <a class="nav-item flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container-high"
+               href="../campo/index.html">
+                <span class="material-symbols-outlined">dashboard</span>
+                <span class="font-data text-[13px]">Mi Campo</span>
+            </a>
+
+            <a class="nav-item flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container-high"
+               href="../poliza/index.html">
+                <span class="material-symbols-outlined">verified_user</span>
+                <span class="font-data text-[13px]">Mi Póliza</span>
+            </a>
+
+            <a class="nav-item flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container-high"
+               href="../historial/index.html">
+                <span class="material-symbols-outlined">history</span>
+                <span class="font-data text-[13px]">Historial</span>
+            </a>
+
+        </nav>
+    </aside>
+
+    <!-- MAIN (TU CONTENIDO SIN ROMPER) -->
+    <main class="flex-1 p-6">
+
+        <!-- TU VIEW ORIGINAL -->
+        <div id="view-history" class="max-w-6xl mx-auto space-y-8">
+
+            <!-- HEADER -->
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 border-b border-outline-variant pb-8">
+                <div class="space-y-2">
+                    <div class="flex items-center gap-3">
+                        <div class="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center border border-primary/20 shadow-inner">
+                            <span class="material-symbols-outlined text-primary text-[28px]">history</span>
+                        </div>
+                        <div>
+                            <h2 class="font-headline text-[36px] font-extrabold text-primary">Mi Historial</h2>
+                            <p class="font-data text-[11px] text-on-surface-variant uppercase">
+                                Auditoría: <span class="text-primary font-bold">PAMPA_CORE_772</span>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <button onclick="clearHistory()" class="px-5 py-2.5 bg-white border border-error/30 text-error rounded-xl font-data text-[12px] font-bold uppercase hover:bg-error/5">
+                        Borrar Historial
+                    </button>
+                </div>
+            </div>
+
+            <!-- TABLA -->
+            <div class="glass-card border border-outline-variant rounded-[32px] overflow-hidden shadow-sm">
+                <div class="overflow-x-auto custom-scrollbar">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                        <tr class="bg-surface-container-low border-b border-outline-variant">
+                            <th class="p-6 font-data text-[10px] uppercase">Fecha</th>
+                            <th class="p-6 font-data text-[10px] uppercase">Periodo</th>
+                            <th class="p-6 font-data text-[10px] uppercase text-center">Área</th>
+                            <th class="p-6 font-data text-[10px] uppercase text-center">Lluvia</th>
+                            <th class="p-6 font-data text-[10px] uppercase text-center">NDVI</th>
+                            <th class="p-6 font-data text-[10px] uppercase">Estado</th>
+                            <th class="p-6 font-data text-[10px] uppercase text-right">Acción</th>
+                        </tr>
+                        </thead>
+                        <tbody id="history-table-body" class="divide-y divide-outline-variant"></tbody>
+                    </table>
+                </div>
+
+                <div id="history-empty" class="hidden p-20 text-center">
+                    Sin datos
+                </div>
+            </div>
+
+        </div>
+    </main>
+</div>
+
+<script src="main.js"></script>
+
+</body>
+</html>

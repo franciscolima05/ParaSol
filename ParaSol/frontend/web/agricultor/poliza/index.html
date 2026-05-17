@@ -1,0 +1,484 @@
+<!doctype html>
+<html class="light" lang="es">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>ParaSol Terminal - Mi Póliza</title>
+
+    <!-- Tailwind & Fonts -->
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Manrope:wght@600;700;800&family=Work+Sans:wght@400;500&family=JetBrains+Mono:wght@400;500;600;700&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+        rel="stylesheet" />
+
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        surface: "#F8F9FF",
+                        primary: "#5b4300",
+                        secondary: "#3f6900",
+                        error: "#BA1A1A",
+                        "on-surface": "#121C2A",
+                        "on-surface-variant": "#4d4637",
+                        "surface-container-low": "#EFF4FF",
+                        "surface-container-high": "#E1E2E9",
+                        "outline-variant": "#d1c5b2",
+                        "secondary-container": "#AEF35E",
+                        "on-secondary-container": "#426E00",
+                        "on-primary": "#FFFFFF",
+                    },
+                    fontFamily: {
+                        headline: ["Manrope"],
+                        body: ["Work Sans"],
+                        data: ["JetBrains Mono"],
+                    },
+                },
+            },
+        };
+    </script>
+</head>
+
+<body class="bg-surface text-on-surface font-body min-h-screen">
+    <!-- HEADER FIXED -->
+    <header
+        class="fixed top-0 left-0 w-full z-[1001] h-16 flex items-center justify-between px-6 bg-surface border-b border-outline-variant">
+        <div class="flex items-center gap-2">
+            <span class="material-symbols-outlined text-primary">agriculture</span>
+            <h1 class="font-headline text-[24px] font-extrabold text-primary">
+                ParaSol Terminal
+            </h1>
+        </div>
+
+        <div class="hidden md:flex items-center gap-6">
+            <div class="flex flex-col items-end">
+                <span class="font-data text-[11px] uppercase text-on-surface-variant">ESTADO_CAMPO</span>
+                <span class="font-data text-[12px] text-primary font-bold">MONITOREO_ACTIVO</span>
+            </div>
+            <div class="w-px h-8 bg-outline-variant"></div>
+            <div class="flex flex-col items-end">
+                <span class="font-data text-[11px] uppercase text-on-surface-variant">COBERTURA</span>
+                <span class="font-data text-[12px] text-secondary font-bold">ACTIVA (100%)</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- LAYOUT PRINCIPAL -->
+    <div class="pt-16 flex min-h-screen">
+        <!-- SIDEBAR -->
+        <aside
+            class="hidden md:flex flex-col w-64 shrink-0 bg-surface-container-low border-r border-outline-variant p-4">
+            <nav class="flex-1 space-y-1">
+                <a class="nav-item flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container-high"
+                    href="../campo/index.html">
+                    <span class="material-symbols-outlined">dashboard</span>
+                    <span class="font-data text-[13px]">Mi Campo</span>
+                </a>
+
+                <a class="nav-item flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container-high"
+                    href="../poliza/index.html">
+                    <span class="material-symbols-outlined">verified_user</span>
+                    <span class="font-data text-[13px]">Mi Póliza</span>
+                </a>
+
+                <a class="nav-item flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container-high"
+                    href="../historial/index.html">
+                    <span class="material-symbols-outlined">history</span>
+                    <span class="font-data text-[13px]">Historial</span>
+                </a>
+            </nav>
+        </aside>
+
+        <!-- CONTENIDO -->
+        <main class="flex-1 p-6">
+            <div id="view-policy" class="max-w-6xl mx-auto space-y-8">
+
+
+                <!-- CONTENIDO (tu layout intacto) -->
+                <div class="text-on-surface-variant text-sm">
+                    <!-- HEADER: ESTADO GLOBAL -->
+                    <div
+                        class="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 border-b border-outline-variant pb-8">
+                        <div class="space-y-2">
+                            <div class="flex items-center gap-3">
+                                <div
+                                    class="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center border border-primary/20 shadow-inner">
+                                    <span
+                                        class="material-symbols-outlined text-primary text-[28px]">verified_user</span>
+                                </div>
+                                <div>
+                                    <h2
+                                        class="font-headline text-[36px] font-extrabold text-primary tracking-tighter leading-none">
+                                        Mi Póliza NFT
+                                    </h2>
+                                    <p
+                                        class="font-data text-[11px] text-on-surface-variant uppercase tracking-[0.2em] mt-1">
+                                        Smart Contract:
+                                        <span class="text-primary font-bold select-all">0xe7f1725E...0512</span>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        <div
+                            class="flex items-center gap-6 bg-surface-container-low p-4 rounded-2xl border border-outline-variant">
+                            <div class="flex flex-col items-end">
+                                <span
+                                    class="font-data text-[10px] text-on-surface-variant uppercase font-bold">Network_Status</span>
+                                <span
+                                    class="font-data text-[12px] text-secondary font-bold uppercase flex items-center gap-2">
+                                    <span class="w-2 h-2 rounded-full bg-secondary animate-pulse"></span>
+                                    Avalanche Fuji
+                                </span>
+                            </div>
+                            <div class="h-10 w-px bg-outline-variant"></div>
+                            <div id="policy-status-badge"
+                                class="px-6 py-2 bg-secondary-container text-on-secondary-container rounded-xl font-data font-bold text-[14px] border border-secondary/20 shadow-lg shadow-secondary/10">
+                                ACTIVA
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- GRID PRINCIPAL -->
+                    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                        <!-- COLUMNA IZQUIERDA: DETALLES TÉCNICOS (8 COLS) -->
+                        <div class="lg:col-span-8 space-y-8">
+                            <!-- CARD: CERTIFICADO NFT -->
+                            <div
+                                class="glass-card border border-outline-variant rounded-[32px] p-10 shadow-sm relative overflow-hidden group">
+                                <div
+                                    class="absolute -top-24 -right-24 w-64 h-64 bg-primary/5 rounded-full blur-3xl group-hover:bg-primary/10 transition-all duration-700">
+                                </div>
+
+                                <div class="relative z-10 space-y-10">
+                                    <div class="flex justify-between items-start">
+                                        <div>
+                                            <span
+                                                class="font-data text-[11px] text-on-surface-variant uppercase font-bold tracking-widest block mb-1">Asset_Identifier</span>
+                                            <h3 class="font-data text-[28px] font-bold text-primary">
+                                                ParaSol_NFT #1042
+                                            </h3>
+                                        </div>
+                                        <div class="text-right">
+                                            <span
+                                                class="font-data text-[11px] text-on-surface-variant uppercase font-bold tracking-widest block mb-1">Owner_Address</span>
+                                            <span
+                                                class="font-data text-[13px] text-on-surface font-bold select-all">0x84f...C16</span>
+                                        </div>
+                                    </div>
+
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
+                                        <div class="space-y-8">
+                                            <div>
+                                                <label
+                                                    class="font-data text-[10px] text-on-surface-variant uppercase font-bold tracking-widest block mb-2">Cobertura_Total
+                                                    (USDC)</label>
+                                                <div id="policy-coverage"
+                                                    class="font-data text-[36px] font-bold text-primary tabular-nums">
+                                                    5,000.00
+                                                </div>
+                                                <p class="font-body text-[11px] text-on-surface-variant mt-1">
+                                                    Monto máximo de indemnización paramétrica.
+                                                </p>
+                                            </div>
+                                            <div>
+                                                <label
+                                                    class="font-data text-[10px] text-on-surface-variant uppercase font-bold tracking-widest block mb-2">Prima_Pagada
+                                                    (USDC)</label>
+                                                <div id="policy-premium"
+                                                    class="font-data text-[36px] font-bold text-on-surface tabular-nums">
+                                                    450.00
+                                                </div>
+                                                <p class="font-body text-[11px] text-on-surface-variant mt-1">
+                                                    Costo de adquisición del seguro.
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <div class="space-y-6">
+                                            <div
+                                                class="p-5 bg-surface-container-low rounded-2xl border border-outline-variant">
+                                                <label
+                                                    class="font-data text-[10px] text-on-surface-variant uppercase font-bold tracking-widest block mb-4">Vigencia_Contrato</label>
+                                                <div class="flex items-center justify-between">
+                                                    <div>
+                                                        <span
+                                                            class="font-data text-[9px] text-on-surface-variant uppercase block mb-1">Start_Date</span>
+                                                        <span id="policy-start"
+                                                            class="font-data text-[14px] font-bold text-on-surface">01
+                                                            MAR 2024</span>
+                                                    </div>
+                                                    <span
+                                                        class="material-symbols-outlined text-outline-variant">arrow_forward</span>
+                                                    <div class="text-right">
+                                                        <span
+                                                            class="font-data text-[9px] text-on-surface-variant uppercase block mb-1">End_Date</span>
+                                                        <span id="policy-end"
+                                                            class="font-data text-[14px] font-bold text-on-surface">31
+                                                            DIC 2024</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <label
+                                                    class="font-data text-[10px] text-on-surface-variant uppercase font-bold tracking-widest block mb-2">Trigger_Snapshot_Hash</label>
+                                                <div
+                                                    class="flex items-center gap-2 bg-surface-container-lowest p-3 rounded-xl border border-outline-variant">
+                                                    <span
+                                                        class="material-symbols-outlined text-primary text-[18px]">fingerprint</span>
+                                                    <code id="policy-snapshot-hash"
+                                                        class="font-data text-[10px] text-primary truncate select-all">0x5a6b7c8d9e0f1a2b3c4d5e6f7a8b9c0d1e2f3a4b</code>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="pt-8 border-t border-outline-variant">
+                                        <label
+                                            class="font-data text-[10px] text-on-surface-variant uppercase font-bold tracking-widest block mb-3">Lote_Vinculado
+                                            (Field_Hash)</label>
+                                        <div
+                                            class="flex items-center gap-4 bg-primary/5 p-5 rounded-2xl border border-primary/10">
+                                            <span class="material-symbols-outlined text-primary">grid_view</span>
+                                            <code id="policy-field-hash"
+                                                class="font-data text-[12px] text-primary font-bold break-all select-all">0x772a84b1c16d9e8b3f1e4d2c5a6b7c8d9e0f1a2b3c4d5e6f7a8b9c0d1e2f3a4b</code>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- CARD: EVOLUCIÓN DEL SINIESTRO -->
+                            <div class="glass-card border border-outline-variant rounded-[32px] p-10 shadow-sm">
+                                <div class="flex justify-between items-center mb-10">
+                                    <div class="space-y-1">
+                                        <h3
+                                            class="font-data text-[16px] font-bold text-on-surface uppercase tracking-widest">
+                                            Estado_del_Siniestro
+                                        </h3>
+                                        <p class="font-body text-[13px] text-on-surface-variant">
+                                            Liquidación paramétrica progresiva basada en oráculo
+                                            satelital.
+                                        </p>
+                                    </div>
+                                    <div class="text-right">
+                                        <div id="policy-payout-pct"
+                                            class="font-data text-[48px] font-bold text-primary leading-none tabular-nums">
+                                            40%
+                                        </div>
+                                        <div
+                                            class="font-data text-[11px] text-secondary font-bold uppercase tracking-widest mt-1">
+                                            Indemnizado
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="relative mb-12">
+                                    <div
+                                        class="h-8 bg-surface-container-high rounded-full overflow-hidden border border-outline-variant p-1.5">
+                                        <div id="policy-payout-bar"
+                                            class="h-full bg-gradient-to-r from-primary to-secondary rounded-full transition-all duration-1000 relative shadow-lg progress-bar-animated"
+                                            style="width: 40%"></div>
+                                    </div>
+                                    <div class="absolute top-12 left-0 w-full flex justify-between px-1">
+                                        <div class="flex flex-col items-center">
+                                            <div class="w-px h-3 bg-outline-variant mb-2"></div>
+                                            <span
+                                                class="font-data text-[9px] text-on-surface-variant font-bold">0%</span>
+                                        </div>
+                                        <div class="flex flex-col items-center">
+                                            <div class="w-px h-3 bg-outline-variant mb-2"></div>
+                                            <span
+                                                class="font-data text-[9px] text-on-surface-variant font-bold">25%</span>
+                                        </div>
+                                        <div class="flex flex-col items-center">
+                                            <div class="w-px h-3 bg-outline-variant mb-2"></div>
+                                            <span
+                                                class="font-data text-[9px] text-on-surface-variant font-bold">50%</span>
+                                        </div>
+                                        <div class="flex flex-col items-center">
+                                            <div class="w-px h-3 bg-outline-variant mb-2"></div>
+                                            <span
+                                                class="font-data text-[9px] text-on-surface-variant font-bold">75%</span>
+                                        </div>
+                                        <div class="flex flex-col items-center">
+                                            <div class="w-px h-3 bg-outline-variant mb-2"></div>
+                                            <span
+                                                class="font-data text-[9px] text-on-surface-variant font-bold">100%</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                    <div
+                                        class="p-6 rounded-2xl border border-secondary/30 bg-secondary/5 flex flex-col items-center text-center">
+                                        <span
+                                            class="font-data text-[10px] text-on-surface-variant uppercase font-bold mb-2">Tramo_Leve</span>
+                                        <div class="font-data text-[20px] font-bold text-secondary">
+                                            25%
+                                        </div>
+                                        <div
+                                            class="mt-4 px-4 py-1 bg-secondary text-white text-[9px] font-bold rounded-full uppercase tracking-widest">
+                                            PAGADO
+                                        </div>
+                                    </div>
+                                    <div
+                                        class="p-6 rounded-2xl border border-primary/40 bg-primary/5 flex flex-col items-center text-center relative overflow-hidden">
+                                        <div class="absolute top-0 left-0 w-full h-1 bg-primary animate-pulse"></div>
+                                        <span
+                                            class="font-data text-[10px] text-on-surface-variant uppercase font-bold mb-2">Tramo_Moderado</span>
+                                        <div class="font-data text-[20px] font-bold text-primary">
+                                            50%
+                                        </div>
+                                        <div
+                                            class="mt-4 px-4 py-1 bg-primary text-white text-[9px] font-bold rounded-full uppercase tracking-widest">
+                                            EN_PROCESO
+                                        </div>
+                                    </div>
+                                    <div
+                                        class="p-6 rounded-2xl border border-outline-variant bg-surface-container-low flex flex-col items-center text-center opacity-50">
+                                        <span
+                                            class="font-data text-[10px] text-on-surface-variant uppercase font-bold mb-2">Tramo_Severo</span>
+                                        <div class="font-data text-[20px] font-bold text-on-surface-variant">
+                                            75%
+                                        </div>
+                                        <div
+                                            class="mt-4 px-4 py-1 bg-outline-variant text-on-surface-variant text-[9px] font-bold rounded-full uppercase tracking-widest">
+                                            PENDIENTE
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- COLUMNA DERECHA: POOL & ACTIVIDAD (4 COLS) -->
+                        <div class="lg:col-span-4 space-y-8">
+                            <!-- CARD: INFO DEL POOL -->
+                            <div
+                                class="bg-secondary/5 border border-secondary/20 rounded-[32px] p-8 space-y-8 relative overflow-hidden">
+                                <div class="flex items-center gap-3">
+                                    <span
+                                        class="material-symbols-outlined text-secondary text-[24px]">account_balance</span>
+                                    <h4
+                                        class="font-data text-[12px] text-secondary font-bold uppercase tracking-[0.2em]">
+                                        Fondo_de_Respaldo
+                                    </h4>
+                                </div>
+
+                                <div class="space-y-8">
+                                    <div>
+                                        <h5 id="pool-name"
+                                            class="font-headline text-[24px] font-bold text-on-surface leading-tight">
+                                            Riesgo Hídrico Pampa Q1
+                                        </h5>
+                                        <span
+                                            class="font-data text-[11px] text-on-surface-variant uppercase font-bold">Pool_ID:
+                                            #01</span>
+                                    </div>
+
+                                    <div class="space-y-4">
+                                        <div class="p-5 bg-white rounded-2xl border border-secondary/10 shadow-sm">
+                                            <label
+                                                class="font-data text-[10px] text-on-surface-variant uppercase font-bold block mb-1">Capital_Disponible</label>
+                                            <div id="pool-available"
+                                                class="font-data text-[28px] font-bold text-secondary tabular-nums">
+                                                125,400.00
+                                            </div>
+                                            <span
+                                                class="font-data text-[10px] text-secondary font-bold uppercase">USDC</span>
+                                        </div>
+                                        <div class="grid grid-cols-2 gap-4">
+                                            <div class="p-4 bg-white/50 rounded-xl border border-outline-variant">
+                                                <label
+                                                    class="font-data text-[9px] text-on-surface-variant uppercase block mb-1">Locked</label>
+                                                <div id="pool-locked"
+                                                    class="font-data text-[16px] font-bold text-on-surface tabular-nums">
+                                                    84,200
+                                                </div>
+                                            </div>
+                                            <div class="p-4 bg-white/50 rounded-xl border border-outline-variant">
+                                                <label
+                                                    class="font-data text-[9px] text-on-surface-variant uppercase block mb-1">Paid_Out</label>
+                                                <div id="pool-paid"
+                                                    class="font-data text-[16px] font-bold text-on-surface tabular-nums">
+                                                    12,500
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <button
+                                        class="w-full py-4 bg-secondary text-white font-data text-[13px] font-bold rounded-2xl uppercase tracking-widest hover:bg-secondary/90 transition-all shadow-lg shadow-secondary/20">
+                                        Explorar Pool_Metrics
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- CARD: ACTIVIDAD RECIENTE (LOGS) -->
+                            <div class="glass-card border border-outline-variant rounded-[32px] p-8 space-y-6">
+                                <div class="flex items-center justify-between">
+                                    <h4
+                                        class="font-data text-[12px] text-on-surface-variant font-bold uppercase tracking-widest">
+                                        On-Chain_Activity
+                                    </h4>
+                                    <span
+                                        class="material-symbols-outlined text-on-surface-variant text-[18px]">history</span>
+                                </div>
+
+                                <div class="space-y-8">
+                                    <div class="flex gap-4 relative">
+                                        <div class="absolute top-8 left-2.5 w-px h-12 bg-outline-variant"></div>
+                                        <div
+                                            class="w-5 h-5 rounded-full bg-secondary flex items-center justify-center shrink-0 z-10 shadow-sm shadow-secondary/50">
+                                            <span
+                                                class="material-symbols-outlined text-white text-[12px]">payments</span>
+                                        </div>
+                                        <div class="space-y-1">
+                                            <div class="font-data text-[13px] font-bold text-on-surface">
+                                                Payout_Triggered
+                                            </div>
+                                            <div class="font-data text-[10px] text-on-surface-variant uppercase">
+                                                15 MAY 2024 • 14:22
+                                            </div>
+                                            <div class="font-data text-[12px] text-secondary font-bold">
+                                                +2,000.00 USDC
+                                            </div>
+                                            <a href="#"
+                                                class="font-data text-[9px] text-primary hover:underline uppercase">TX:
+                                                0x4a2...e91</a>
+                                        </div>
+                                    </div>
+                                    <div class="flex gap-4">
+                                        <div
+                                            class="w-5 h-5 rounded-full bg-primary flex items-center justify-center shrink-0 z-10 shadow-sm shadow-primary/50">
+                                            <span
+                                                class="material-symbols-outlined text-white text-[12px]">verified</span>
+                                        </div>
+                                        <div class="space-y-1">
+                                            <div class="font-data text-[13px] font-bold text-on-surface">
+                                                Policy_Minted
+                                            </div>
+                                            <div class="font-data text-[10px] text-on-surface-variant uppercase">
+                                                01 MAR 2024 • 09:15
+                                            </div>
+                                            <div class="font-data text-[12px] text-primary font-bold">
+                                                NFT #1042
+                                            </div>
+                                            <a href="#"
+                                                class="font-data text-[9px] text-primary hover:underline uppercase">TX:
+                                                0x1b8...c22</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="main.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html class="light" lang="es">
+
+<head>
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <title>ParaSol Terminal - Asistente Agronómico</title>
+
+    <!-- Tailwind & Fonts -->
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Manrope:wght@600;700;800&family=Work+Sans:wght@400;500&family=JetBrains+Mono:wght@400;500;600;700&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+        rel="stylesheet">
+
+    <!-- Leaflet & Plugins -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-draw/dist/leaflet.draw.css" />
+
+    <link rel="stylesheet" href="styles.css">
+
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "error-container": "#ffdad6",
+                        "surface": "#F8F9FF",
+                        "primary": "#5b4300",
+                        "secondary": "#3f6900",
+                        "error": "#BA1A1A",
+                        "on-surface": "#121C2A",
+                        "on-surface-variant": "#4d4637",
+                        "surface-container-low": "#EFF4FF",
+                        "outline-variant": "#d1c5b2",
+                        "secondary-container": "#AEF35E",
+                        "on-secondary-container": "#426E00",
+                        "on-primary": "#FFFFFF"
+                    },
+                    "fontFamily": {
+                        "headline": ["Manrope"],
+                        "body": ["Work Sans"],
+                        "data": ["JetBrains Mono"]
+                    },
+                },
+            },
+        }
+    </script>
+</head>
+
+<body class="bg-surface text-on-surface font-body h-screen flex flex-col overflow-hidden">
+    <!-- TopAppBar -->
+    <header
+        class="fixed top-0 left-0 w-full z-[1001] flex justify-between items-center px-6 h-16 bg-surface border-b border-outline-variant shrink-0">
+        <div class="flex items-center gap-2">
+            <span class="material-symbols-outlined text-primary">agriculture</span>
+            <h1 class="font-headline text-[24px] font-extrabold text-primary tracking-tighter">ParaSol Terminal</h1>
+        </div>
+        <div class="hidden md:flex items-center gap-6">
+            <div class="flex flex-col items-end">
+                <span
+                    class="font-data text-[11px] font-medium text-on-surface-variant uppercase tracking-wider">ESTADO_CAMPO</span>
+                <span id="global-status"
+                    class="font-data text-[12px] text-primary font-bold uppercase">MONITOREO_ACTIVO</span>
+            </div>
+            <div class="w-px h-8 bg-outline-variant"></div>
+            <div class="flex flex-col items-end">
+                <span
+                    class="font-data text-[11px] font-medium text-on-surface-variant uppercase tracking-wider">COBERTURA_SEGURO</span>
+                <span id="policy-status-top" class="font-data text-[12px] text-secondary font-bold uppercase">ACTIVA
+                    (100%)</span>
+            </div>
+        </div>
+    </header>
+
+    <div class="flex flex-1 mt-16 overflow-hidden">
+        <!-- SideNavBar -->
+        <aside
+            class="hidden md:flex flex-col h-full bg-surface-container-low border-r border-outline-variant w-64 shrink-0 p-4">
+            <nav class="flex-1 space-y-1">
+                <a class="flex items-center gap-3 bg-secondary-container text-on-secondary-container font-bold rounded-lg px-4 py-3"
+                    href="#">
+                    <span class="material-symbols-outlined">dashboard</span>
+                    <span class="font-data text-[13px]">Mi Campo</span>
+                </a>
+                <a class="flex items-center gap-3 text-on-surface-variant hover:bg-surface-container-high px-4 py-3 rounded-lg"
+                    href="#">
+                    <span class="material-symbols-outlined">verified_user</span>
+                    <span class="font-data text-[13px]" onclick="window.location.href='../poliza/index.html'">Mi
+                        Póliza</span>
+                </a>
+                <a class="flex items-center gap-3 text-on-surface-variant hover:bg-surface-container-high px-4 py-3 rounded-lg"
+                    href="#">
+                    <span class="material-symbols-outlined">history</span>
+                    <span class="font-data text-[13px]">Historial</span>
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Main Dashboard Content -->
+        <main class="flex-1 flex flex-col md:flex-row overflow-hidden bg-surface">
+            <section class="flex-1 flex flex-col border-r border-outline-variant overflow-y-auto">
+                <!-- STEP 1: MAP & SELECTION -->
+                <div class="border-b border-outline-variant">
+                    <div
+                        class="flex justify-between items-center p-4 bg-surface-container-low border-b border-outline-variant">
+                        <span
+                            class="font-data text-[12px] font-bold text-primary flex items-center gap-2 uppercase tracking-widest">
+                            <span class="material-symbols-outlined text-[16px]">map</span> SELECCIÓN_DE_LOTE
+                        </span>
+                        <span class="font-data text-[10px] text-on-surface-variant">ID_LOTE: PAMPA_CORE_772</span>
+                    </div>
+
+                    <div class="relative h-[340px] w-full bg-surface-dim overflow-hidden">
+                        <div id="map" class="absolute inset-0"></div>
+                        <div class="absolute inset-0 scanline-overlay z-[1000] pointer-events-none"></div>
+
+                        <!-- Overlays -->
+                        <div class="absolute top-4 left-4 flex flex-col gap-2 z-[1000]">
+                            <div class="map-overlay-glass p-2 rounded shadow-sm">
+                                <div class="font-data text-[9px] text-on-surface-variant font-bold uppercase">COORDS
+                                </div>
+                                <div class="font-data text-[11px] text-primary font-bold">
+                                    <span id="lat-display">-38.200</span>, <span id="lng-display">-60.300</span>
+                                </div>
+                            </div>
+                            <div class="map-overlay-glass p-2 rounded shadow-sm">
+                                <div class="font-data text-[9px] text-on-surface-variant font-bold uppercase">SUPERFICIE
+                                </div>
+                                <div id="area-display" class="font-data text-[11px] text-secondary font-bold">0.00 ha
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Tools -->
+                        <div class="absolute top-4 right-4 flex flex-col gap-1 z-[1000]">
+                            <div class="map-overlay-glass p-1 rounded shadow-sm flex flex-col gap-1">
+                                <button onclick="startDrawPolygon()" class="btn-map-tool text-primary"
+                                    title="Dibujar Lote">
+                                    <span class="material-symbols-outlined text-[20px]">pentagon</span>
+                                </button>
+                                <button onclick="clearMap()" class="btn-map-tool text-error hover:bg-error-container"
+                                    title="Borrar Selección">
+                                    <span class="material-symbols-outlined text-[20px]">delete</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="p-4 grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+                        <div class="space-y-2 md:col-span-2">
+                            <label class="font-data text-[10px] font-bold text-on-surface-variant uppercase">Período de
+                                Análisis (Campaña Actual)</label>
+                            <div class="flex flex-col md:flex-row gap-2">
+                                <div class="flex gap-2 w-full md:w-1/3">
+                                    <input id="date-start"
+                                        class="w-1/2 bg-surface-container-lowest border border-outline-variant text-secondary font-data text-[12px] px-3 py-2 rounded-lg"
+                                        type="date" value="2024-03-01">
+                                    <input id="date-end"
+                                        class="w-1/2 bg-surface-container-lowest border border-outline-variant text-secondary font-data text-[12px] px-3 py-2 rounded-lg"
+                                        type="date" value="2024-12-31">
+                                </div>
+                                <div class="w-full md:w-2/3 relative">
+                                    <input id="geojson-input"
+                                        class="w-full bg-surface-container-lowest border border-outline-variant text-primary font-data text-[11px] px-4 py-2 rounded-lg"
+                                        type="text" placeholder="GeoJSON del lote..." readonly>
+                                    <span
+                                        class="absolute right-3 top-2.5 material-symbols-outlined text-[16px] text-on-surface-variant opacity-50">data_object</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                            <button id="btn-analyze" onclick="analyzeField()"
+                                class="w-full py-2.5 bg-primary text-on-primary font-headline text-[13px] font-bold rounded-lg shadow-sm hover:opacity-90 transition-all uppercase tracking-wider">
+                                ANALIZAR MI CAMPO
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- STEP 2: SATELLITE INSIGHTS -->
+                <div class="p-4">
+                    <div class="flex justify-between items-center mb-4">
+                        <span
+                            class="font-data text-[12px] font-bold text-primary flex items-center gap-2 uppercase tracking-widest">
+                            <span class="material-symbols-outlined text-[16px]">analytics</span> MÉTRICAS_SATELITALES
+                        </span>
+                        <div id="comparison-tag"
+                            class="px-2 py-1 bg-surface-container-high border border-outline-variant font-data text-[9px] text-on-surface-variant rounded uppercase">
+                            VS_PROMEDIO_HISTÓRICO: ---</div>
+                    </div>
+
+                    <div id="results-container" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <!-- Card 1: Precipitación -->
+                        <div id="card-rainfall"
+                            class="border border-outline-variant bg-surface-container-lowest rounded-xl p-4 opacity-50">
+                            <div class="flex justify-between items-start mb-2">
+                                <div class="font-data text-[10px] text-on-surface-variant uppercase">Lluvia Acumulada
+                                </div>
+                                <span class="status-label font-data text-[9px] font-bold text-primary">IDLE</span>
+                            </div>
+                            <div class="flex items-baseline gap-2">
+                                <div id="val-rainfall-total" class="font-data text-[24px] font-bold text-primary">0.00
+                                    mm</div>
+                                <div id="val-rainfall-diff" class="font-data text-[10px] text-secondary font-bold">+0%
+                                    vs hist.</div>
+                            </div>
+                        </div>
+
+                        <!-- Card 2: TWI -->
+                        <div id="card-twi"
+                            class="border border-outline-variant bg-surface-container-lowest rounded-xl p-4 opacity-50">
+                            <div class="flex justify-between items-start mb-2">
+                                <div class="font-data text-[10px] text-on-surface-variant uppercase">Riesgo de
+                                    Anegamiento (TWI)</div>
+                                <span class="status-label font-data text-[9px] font-bold text-primary">IDLE</span>
+                            </div>
+                            <div class="flex items-baseline gap-2">
+                                <div id="val-twi-avg" class="font-data text-[24px] font-bold text-primary">0.00</div>
+                                <div id="val-twi-status"
+                                    class="font-data text-[10px] text-secondary font-bold uppercase">BAJO</div>
+                            </div>
+                        </div>
+
+                        <!-- Card 3: NDVI -->
+                        <div id="card-ndvi"
+                            class="border border-outline-variant bg-surface-container-lowest rounded-xl p-4 opacity-50">
+                            <div class="flex justify-between items-start mb-2">
+                                <div class="font-data text-[10px] text-on-surface-variant uppercase">Vigor Vegetativo
+                                    (NDVI)</div>
+                                <span class="status-label font-data text-[9px] font-bold text-primary">IDLE</span>
+                            </div>
+                            <div class="flex items-baseline gap-2">
+                                <div id="val-ndvi-median" class="font-data text-[24px] font-bold text-primary">0.000
+                                </div>
+                                <div id="val-ndvi-diff" class="font-data text-[10px] text-error font-bold">-0% vs hist.
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Card 4: Flood -->
+                        <div id="card-flood"
+                            class="border border-outline-variant bg-surface-container-lowest rounded-xl p-4 opacity-50">
+                            <div class="flex justify-between items-start mb-2">
+                                <div class="font-data text-[10px] text-on-surface-variant uppercase">Detección de
+                                    Inundación</div>
+                                <span id="val-flood-badge"
+                                    class="font-data text-[9px] font-bold text-primary uppercase">IDLE</span>
+                            </div>
+                            <div class="flex items-baseline gap-2">
+                                <div id="val-flood-pct" class="font-data text-[24px] font-bold text-primary">0.00%</div>
+                                <div id="val-flood-days" class="font-data text-[10px] text-secondary font-bold">0 DÍAS
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Right Panel: Insights & Policy -->
+            <aside
+                class="w-full md:w-96 flex flex-col bg-surface-container-low shrink-0 border-l border-outline-variant overflow-y-auto">
+                <!-- Recomendaciones -->
+                <div class="p-4 border-b border-outline-variant">
+                    <div class="flex items-center gap-2 mb-4">
+                        <span class="material-symbols-outlined text-primary">lightbulb</span>
+                        <h2 class="font-headline text-[16px] font-bold text-primary uppercase tracking-tighter">
+                            Recomendaciones</h2>
+                    </div>
+                    <div id="insights-container" class="space-y-3">
+                        <div class="p-3 bg-surface-container-high rounded-xl border border-outline-variant">
+                            <div class="font-data text-[11px] text-on-surface-variant">Selecciona un lote para generar
+                                recomendaciones agronómicas personalizadas.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Estado del Seguro -->
+                <div class="p-4">
+                    <div class="flex items-center gap-2 mb-4">
+                        <span class="material-symbols-outlined text-secondary">verified_user</span>
+                        <h2 class="font-headline text-[16px] font-bold text-secondary uppercase tracking-tighter">Estado
+                            de Póliza</h2>
+                    </div>
+                    <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-4 space-y-4">
+                        <div class="flex justify-between items-center">
+                            <span class="font-data text-[11px] text-on-surface-variant uppercase">Cobertura</span>
+                            <span class="font-data text-[12px] font-bold text-secondary">EXCESO_HÍDRICO</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="font-data text-[11px] text-on-surface-variant uppercase">Umbral de Pago</span>
+                            <span class="font-data text-[12px] font-bold text-primary">> 15% Anegamiento</span>
+                        </div>
+                        <div class="h-2 bg-surface-container-high rounded-full overflow-hidden">
+                            <div id="policy-progress" class="h-full bg-secondary transition-all duration-1000"
+                                style="width: 0%"></div>
+                        </div>
+                        <div id="policy-message"
+                            class="p-3 bg-secondary/10 text-secondary font-data text-[11px] rounded-lg border border-secondary/20">
+                            Monitoreando condiciones para activación de payout.
+                        </div>
+                    </div>
+                </div>
+            </aside>
+        </main>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet-draw/dist/leaflet.draw.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@turf/turf@6/turf.min.js"></script>
+    <script src="map.js"></script>
+</body>
+
+</html>
