@@ -1,0 +1,9 @@
+services:
+  - type: web
+    name: parasol-backend
+    runtime: python
+    buildCommand: pip install -r ParaSol/requirements.txt
+    startCommand: PYTHONPATH=ParaSol/backend uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: PYTHONPATH
+        value: ParaSol/backend
