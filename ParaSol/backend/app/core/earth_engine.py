@@ -4,6 +4,7 @@ import os
 
 _initialized = False
 
+
 def init_ee():
     global _initialized
 
@@ -18,10 +19,10 @@ def init_ee():
     credentials_dict = json.loads(service_account_json)
 
     credentials = ee.ServiceAccountCredentials(
-        credentials_dict["client_email"],
-        service_account_json  # <- AQUÍ está el fix clave
+        email=credentials_dict["client_email"],
+        key_data=service_account_json,
     )
 
-    ee.Initialize(credentials)
+    ee.Initialize(credentials=credentials, project="parasol-496423")
 
     _initialized = True
