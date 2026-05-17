@@ -53,15 +53,6 @@ El backend (`backend/`) es un servicio geoespacial desarrollado en **Python** ut
     *   `requirements.txt`: Lista de dependencias Python.
     *   `.env.example`: Ejemplo de variables de entorno.
 
-### 3.3. Frontend (Next.js + TypeScript)
-
-El frontend (`frontend/`) es una dApp (aplicación descentralizada) construida con **Next.js** y **TypeScript**. Se conecta a la blockchain Avalanche usando `wagmi` y `viem`.
-
-*   **Tecnologías Sugeridas**:
-    *   `wagmi` + `viem`: Para conexión con Avalanche.
-    *   `@rainbow-me/rainbowkit` o `connectkit`: Para UI de cartera.
-    *   `tailwindcss`: Para estilización.
-    *   `zustand` o `jotai`: Para gestión de estado global.
 
 ## 4. Conclusión
 
