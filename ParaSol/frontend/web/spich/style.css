@@ -174,9 +174,10 @@ nav {
 .btn-outline {
     border: 1px solid var(--outline);
     color: var(--primary);
-    padding: 0.75rem 2rem;
+    padding: 0.5rem 1.5rem;
     border-radius: 0.5rem;
     font-weight: 700;
+    font-size: 0.875rem;
     text-transform: uppercase;
     letter-spacing: 0.05em;
     transition: background-color 0.2s;
