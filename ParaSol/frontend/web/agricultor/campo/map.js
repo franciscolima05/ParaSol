@@ -4,6 +4,37 @@ let drawControl;
 
 const API_BASE_URL = "https://parasol-j08z.onrender.com";
 
+// ─── DATOS HARDCODEADOS (MOCK) ────────────────────────────────────────────────
+const MOCK_DATA = {
+    rainfall: {
+        total_rainfall_mm: 742.5,
+        peak_rainfall_mm: 87.3,
+        rainy_days: 34
+    },
+    twi: {
+        data: {
+            avg_twi: 10.4,
+            max_twi: 14.2,
+            min_twi: 6.1
+        }
+    },
+    ndvi: {
+        ndvi: {
+            ndvi_median: 0.28,
+            ndvi_mean: 0.31,
+            ndvi_min: 0.12,
+            ndvi_max: 0.61
+        }
+    },
+    flood: {
+        flood_detected: true,
+        flooded_area_pct: 18.7,
+        flood_days: 12,
+        flooded_area_ha: 27.2
+    }
+};
+// ─────────────────────────────────────────────────────────────────────────────
+
 function initMap() {
     map = L.map('map', {
         zoomControl: false,
@@ -77,100 +108,97 @@ async function analyzeField() {
     const geojsonRaw = document.getElementById('geojson-input').value;
     if (!geojsonRaw) { alert("ERROR: Dibuja una parcela primero."); return; }
 
-    let geojsonData = JSON.parse(geojsonRaw);
-    const startDate = document.getElementById('date-start').value;
-    const endDate = document.getElementById('date-end').value;
     const btn = document.getElementById('btn-analyze');
-    
+    const cards = ['card-rainfall', 'card-twi', 'card-ndvi', 'card-flood'];
+
     btn.innerText = "PROCESANDO...";
     btn.disabled = true;
 
-    // Loading states
-    const cards = ['card-rainfall', 'card-twi', 'card-ndvi', 'card-flood'];
+    // Estados de carga — con optional chaining para evitar null errors
     cards.forEach(id => {
-        const card = document.getElementById(id);
-        card.querySelector('.status-label').innerText = "CONSULTANDO...";
-        card.querySelector('.status-label').classList.add('animate-pulse');
+        const lbl = document.getElementById(id)?.querySelector('.status-label');
+        if (lbl) {
+            lbl.innerText = "CONSULTANDO...";
+            lbl.classList.add('animate-pulse');
+        }
     });
 
+    // Simular latencia de red (1.2s) antes de mostrar los datos mock
+    await new Promise(resolve => setTimeout(resolve, 1200));
+
     try {
-        const [rainfallRes, twiRes, ndviRes, floodRes] = await Promise.all([
-            fetch(`${API_BASE_URL}/rainfall/check`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ coordinates: geojsonData.polygon.coordinates, start_date: startDate, end_date: endDate })
-            }),
-            fetch(`${API_BASE_URL}/analysis/twi`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ polygon: geojsonData.polygon })
-            }),
-            fetch(`${API_BASE_URL}/analysis/ndvi`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ polygon: geojsonData.polygon })
-            }),
-            fetch(`${API_BASE_URL}/analysis/flood`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    polygon: geojsonData.polygon,
-                    pre_event: { start_date: "2024-01-01", end_date: "2024-01-31" },
-                    post_event: { start_date: startDate, end_date: endDate }
-                })
-            })
-        ]);
-
-        const rainfall = await rainfallRes.json();
-        const twi = await twiRes.json();
-        const ndvi = await ndviRes.json();
-        const flood = await floodRes.json();
-
-        updateProducerUI(rainfall, twi, ndvi, flood);
-
+        updateProducerUI(MOCK_DATA.rainfall, MOCK_DATA.twi, MOCK_DATA.ndvi, MOCK_DATA.flood);
     } catch (error) {
-        console.error("API Error:", error);
-        alert("Error de conexión con el motor satelital.");
+        console.error("Error al procesar datos:", error);
+        alert("Error al procesar los datos satelitales.");
     } finally {
         btn.innerText = "ANALIZAR MI CAMPO";
         btn.disabled = false;
-        cards.forEach(id => document.getElementById(id).querySelector('.status-label').classList.remove('animate-pulse'));
+        cards.forEach(id => {
+            const lbl = document.getElementById(id)?.querySelector('.status-label');
+            if (lbl) {
+                lbl.classList.remove('animate-pulse');
+                lbl.innerText = "ONLINE";
+            }
+        });
     }
 }
 
 function updateProducerUI(rainfall, twi, ndvi, flood) {
+    const set = (id, val) => { const el = document.getElementById(id); if (el) el.innerText = val; };
+    const setClass = (id, cls) => { const el = document.getElementById(id); if (el) el.className = cls; };
+
     // 1. Actualizar Métricas
-    document.getElementById('val-rainfall-total').innerText = `${rainfall.total_rainfall_mm?.toFixed(1) || '0.0'} mm`;
-    document.getElementById('val-twi-avg').innerText = twi.data?.avg_twi?.toFixed(2) || '0.00';
-    document.getElementById('val-ndvi-median').innerText = ndvi.ndvi?.ndvi_median?.toFixed(3) || '0.000';
-    document.getElementById('val-flood-pct').innerText = `${flood.flooded_area_pct?.toFixed(1) || '0.0'}%`;
-    document.getElementById('val-flood-days').innerText = `${flood.flood_days || '0'} DÍAS`;
+    set('val-rainfall-total', `${rainfall.total_rainfall_mm?.toFixed(1) || '0.0'} mm`);
+    set('val-twi-avg', twi.data?.avg_twi?.toFixed(2) || '0.00');
+    set('val-ndvi-median', ndvi.ndvi?.ndvi_median?.toFixed(3) || '0.000');
+    set('val-flood-pct', `${flood.flooded_area_pct?.toFixed(1) || '0.0'}%`);
+    set('val-flood-days', `${flood.flood_days || '0'} DÍAS`);
 
-    // 2. Simular Comparativa Histórica (Lógica de negocio frontend)
-    const rainDiff = ((rainfall.total_rainfall_mm / 600 - 1) * 100).toFixed(0); // Base 600mm
-    const ndviDiff = ((ndvi.ndvi?.ndvi_median / 0.5 - 1) * 100).toFixed(0); // Base 0.5
-    
-    document.getElementById('val-rainfall-diff').innerText = `${rainDiff > 0 ? '+' : ''}${rainDiff}% vs hist.`;
-    document.getElementById('val-rainfall-diff').className = `font-data text-[10px] font-bold ${rainDiff > 20 ? 'text-error' : 'text-secondary'}`;
-    
-    document.getElementById('val-ndvi-diff').innerText = `${ndviDiff > 0 ? '+' : ''}${ndviDiff}% vs hist.`;
-    document.getElementById('val-ndvi-diff').className = `font-data text-[10px] font-bold ${ndviDiff < -10 ? 'text-error' : 'text-secondary'}`;
+    // 2. Comparativa Histórica
+    const rainDiff = ((rainfall.total_rainfall_mm / 600 - 1) * 100).toFixed(0);
+    const ndviDiff = ((ndvi.ndvi?.ndvi_median / 0.5 - 1) * 100).toFixed(0);
 
-    document.getElementById('comparison-tag').innerText = `VS_PROMEDIO_HISTÓRICO: ${ndviDiff < -10 ? 'ANOMALÍA_DETECTADA' : 'NORMAL'}`;
+    set('val-rainfall-diff', `${rainDiff > 0 ? '+' : ''}${rainDiff}% vs hist.`);
+    setClass('val-rainfall-diff', `font-data text-[10px] font-bold ${rainDiff > 20 ? 'text-error' : 'text-secondary'}`);
 
-    // 3. Generar Recomendaciones (Insights)
+    set('val-ndvi-diff', `${ndviDiff > 0 ? '+' : ''}${ndviDiff}% vs hist.`);
+    setClass('val-ndvi-diff', `font-data text-[10px] font-bold ${ndviDiff < -10 ? 'text-error' : 'text-secondary'}`);
+
+    const compTag = document.getElementById('comparison-tag');
+    if (compTag) compTag.innerText = `VS_PROMEDIO_HISTÓRICO: ${ndviDiff < -10 ? 'ANOMALÍA_DETECTADA' : 'NORMAL'}`;
+
+    // Badge de inundación
+    const floodBadge = document.getElementById('val-flood-badge');
+    if (floodBadge) {
+        floodBadge.innerText = flood.flood_detected ? 'INUNDACIÓN' : 'SIN_EVENTO';
+        floodBadge.className = `font-data text-[9px] font-bold uppercase ${flood.flood_detected ? 'text-error' : 'text-secondary'}`;
+    }
+
+    // TWI status
+    const twiVal = twi.data?.avg_twi || 0;
+    const twiStatus = document.getElementById('val-twi-status');
+    if (twiStatus) {
+        twiStatus.innerText = twiVal > 10 ? 'ALTO' : twiVal > 7 ? 'MEDIO' : 'BAJO';
+        twiStatus.className = `font-data text-[10px] font-bold uppercase ${twiVal > 10 ? 'text-error' : twiVal > 7 ? 'text-primary' : 'text-secondary'}`;
+    }
+
+    // 3. Recomendaciones
     const insights = [];
     if (flood.flood_detected) {
-        insights.push({ icon: 'warning', color: 'text-error', title: 'Inundación Detectada', desc: 'Se recomienda evacuar maquinaria y revisar canales de drenaje inmediatamente.' });
+        insights.push({ icon: 'warning', color: 'text-error', title: 'Inundación Detectada', desc: `Se detectó inundación en el ${flood.flooded_area_pct?.toFixed(1)}% del lote (${flood.flood_days} días). Se recomienda evacuar maquinaria y revisar canales de drenaje inmediatamente.` });
     }
     if (twi.data?.avg_twi > 9 && rainfall.total_rainfall_mm > 100) {
-        insights.push({ icon: 'water_drop', color: 'text-primary', title: 'Riesgo de Saturación', desc: 'Lote en zona baja con alta acumulación hídrica. Posible asfixia radicular.' });
+        insights.push({ icon: 'water_drop', color: 'text-primary', title: 'Riesgo de Saturación', desc: 'Lote en zona baja con alta acumulación hídrica (TWI ' + twi.data.avg_twi.toFixed(1) + '). Posible asfixia radicular en las próximas 48h.' });
     }
     if (ndvi.ndvi?.ndvi_median < 0.3) {
-        insights.push({ icon: 'Grass', color: 'text-error', title: 'Vigor Crítico', desc: 'El cultivo muestra signos de degradación severa. Revisar plagas o anegamiento.' });
+        insights.push({ icon: 'grass', color: 'text-error', title: 'Vigor Crítico', desc: `NDVI de ${ndvi.ndvi.ndvi_median.toFixed(3)} indica degradación severa del cultivo. Revisar plagas o anegamiento prolongado.` });
+    }
+    if (rainfall.total_rainfall_mm > 700) {
+        insights.push({ icon: 'thunderstorm', color: 'text-primary', title: 'Exceso Hídrico', desc: `Lluvia acumulada de ${rainfall.total_rainfall_mm.toFixed(0)} mm supera el promedio histórico. Evaluar drenaje del lote.` });
     }
     if (insights.length === 0) {
-        insights.push({ icon: 'check_circle', color: 'text-secondary', title: 'Estado Óptimo', desc: 'Las métricas satelitales no muestran anomalías críticas en el período.' });
+        insights.push({ icon: 'check_circle', color: 'text-secondary', title: 'Estado Óptimo', desc: 'Las métricas satelitales no muestran anomalías críticas en el período analizado.' });
     }
 
     const insightsContainer = document.getElementById('insights-container');
@@ -185,15 +213,15 @@ function updateProducerUI(rainfall, twi, ndvi, flood) {
     `).join('');
 
     // 4. Estado de Póliza
-    const progress = Math.min((flood.flooded_area_pct / 15) * 100, 100); // Umbral 15%
+    const progress = Math.min((flood.flooded_area_pct / 15) * 100, 100);
     document.getElementById('policy-progress').style.width = `${progress}%`;
-    
+
     const policyMsg = document.getElementById('policy-message');
     if (flood.flooded_area_pct >= 15) {
-        policyMsg.innerText = "UMBRAL DE PAGO ALCANZADO. Payout en proceso de validación on-chain.";
+        policyMsg.innerText = `UMBRAL DE PAGO ALCANZADO (${flood.flooded_area_pct.toFixed(1)}% > 15%). Payout en proceso de validación on-chain.`;
         policyMsg.className = "p-3 bg-error/10 text-error font-data text-[11px] rounded-lg border border-error/20 alert-pulse";
     } else if (flood.flooded_area_pct > 5) {
-        policyMsg.innerText = "ALERTA: Anegamiento parcial detectado. Monitoreando umbral del 15%.";
+        policyMsg.innerText = `ALERTA: Anegamiento al ${flood.flooded_area_pct.toFixed(1)}%. Monitoreando umbral del 15%.`;
         policyMsg.className = "p-3 bg-primary/10 text-primary font-data text-[11px] rounded-lg border border-primary/20";
     } else {
         policyMsg.innerText = "Condiciones normales. Póliza activa sin eventos de pago.";
