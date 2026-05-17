@@ -21,6 +21,15 @@ contract ParaSolPolicy is ERC721, AccessControl{
     }
 
     mapping(uint256 => PolicyData) public policies;
+    event PolicyMinted(
+        uint256 indexed tokenId,
+        address indexed owner,
+        uint256 poolId,
+        uint256 coverageUSDC,
+        uint256 startDate,
+        uint256 endDate,
+        string fieldHash
+    );
 
     constructor(address initialAdmin) ERC721("ParaSol Policy", "PSP") {
         _grantRole(DEFAULT_ADMIN_ROLE, initialAdmin);
@@ -51,7 +60,7 @@ contract ParaSolPolicy is ERC721, AccessControl{
             triggerSnapshotHash: _triggerSnapshotHash,
             isActive: true
         });
-
+        emit PolicyMinted(tokenId, to, _poolId, _coverageUSDC, _startDate, _endDate, _fieldHash);
         return tokenId;
     }
     
