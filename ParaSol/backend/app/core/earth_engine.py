@@ -12,6 +12,7 @@ def init_ee():
         return
 
     service_account_json = os.getenv("EE_SERVICE_ACCOUNT_JSON")
+    print(f"[EE] EE_SERVICE_ACCOUNT_JSON set: {bool(service_account_json)}")
 
     if service_account_json:
         credentials_dict = json.loads(service_account_json)

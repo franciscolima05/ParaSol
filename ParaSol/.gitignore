@@ -23,6 +23,7 @@ coverage.json
 .env.local
 .env.*.local
 !.env.example
+.env.example
 
 # IDE
 .vscode/
