@@ -11,7 +11,8 @@ BASE_DIR = Path(__file__).resolve().parents[2]  # ParaSol/
 
 load_dotenv(BASE_DIR / ".env.dev")
 
-SPICH_DIR = BASE_DIR / "frontend" / "web" / "spich"
+FRONTEND_DIR = BASE_DIR / "frontend" / "web"
+SPICH_DIR = FRONTEND_DIR / "spich"
 
 app = FastAPI()
 
@@ -22,8 +23,11 @@ def startup_event():
 app.include_router(rainfall_router)
 app.include_router(vegetation_router)
 
-app.mount("/static", StaticFiles(directory=str(SPICH_DIR)), name="static")
-
 @app.get("/")
 def serve_index():
     return FileResponse(str(SPICH_DIR / "index.html"))
+
+app.mount("/static", StaticFiles(directory=str(SPICH_DIR)), name="static")
+app.mount("/spich", StaticFiles(directory=str(SPICH_DIR), html=True), name="spich")
+app.mount("/aseguradora", StaticFiles(directory=str(FRONTEND_DIR / "aseguradora"), html=True), name="aseguradora")
+app.mount("/agricultor", StaticFiles(directory=str(FRONTEND_DIR / "agricultor"), html=True), name="agricultor")
