@@ -2,7 +2,7 @@ import asyncio
 from web3 import AsyncWeb3 #pip install web3
 from web3.providers import AsyncHTTPProvider
 
-# 1. Configuración de Entorno (Reemplazar con sus datos de Fuji) //hardcodeado por ahora
+# Configuración de Entorno reales
 RPC_URL = "https://api.avax-test.network/ext/bc/C/rpc" 
 CONTRACT_ADDRESS = "0xd5EE5028332cF8Bf20cdE0eF914268E98a3517c4"
 
@@ -47,8 +47,8 @@ async def handle_policy_minted_event(event):
         "owner_address": args['owner'],
         "pool_id": args['poolId'],
         "coverage_usdc": args['coverageUSDC'],
-        "start_date": args['startDate'], # Timestamp Unix
-        "end_date": args['endDate'],     # Timestamp Unix
+        "start_date": args['startDate'],
+        "end_date": args['endDate'],    
         "field_hash": args['fieldHash']
     }
     
@@ -73,8 +73,7 @@ async def main():
         return
 
     contract = w3.eth.contract(address=CONTRACT_ADDRESS, abi=CONTRACT_ABI)
-
-    # Para evitar escanear la historia de la blockchain desde el bloque cero,
+    
     # arrancamos a escuchar desde el bloque actual de la red al momento de encender el script.
     last_checked_block = await w3.eth.block_number
     print(f"Buscando eventos PolicyMinted desde el bloque {last_checked_block}...")
