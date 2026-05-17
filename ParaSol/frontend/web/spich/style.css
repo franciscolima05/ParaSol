@@ -129,6 +129,7 @@ nav {
     .nav-links {
         display: flex;
         gap: 2rem;
+        margin-left: 4rem;
     }
 }
 
@@ -152,10 +153,10 @@ nav {
 .btn-primary {
     background-color: var(--primary);
     color: var(--on-primary);
-    padding: 0.5rem 1.5rem;
+    padding: 0.35rem 1rem;
     border-radius: 0.5rem;
     font-weight: 700;
-    font-size: 0.875rem;
+    font-size: 0.75rem;
     text-transform: uppercase;
     letter-spacing: 0.1em;
     transition: transform 0.2s, opacity 0.2s;
@@ -174,10 +175,10 @@ nav {
 .btn-outline {
     border: 1px solid var(--outline);
     color: var(--primary);
-    padding: 0.5rem 1.5rem;
+    padding: 0.35rem 1rem;
     border-radius: 0.5rem;
     font-weight: 700;
-    font-size: 0.875rem;
+    font-size: 0.75rem;
     text-transform: uppercase;
     letter-spacing: 0.05em;
     transition: background-color 0.2s;
@@ -526,10 +527,10 @@ footer {
 #lang-toggle {
     background: var(--surface-container);
     border: 1px solid var(--outline-variant);
-    padding: 0.5rem 1rem;
+    padding: 0.35rem 0.75rem;
     border-radius: 0.5rem;
     font-weight: 600;
-    font-size: 0.875rem;
+    font-size: 0.75rem;
     color: var(--primary);
     margin-left: 1rem;
     transition: all 0.2s;
