@@ -10,9 +10,6 @@ from app.services.flood_debug_service import debug_s1_coverage
 
 router = APIRouter()
 
-@router.get("/")
-def root():
-    return {"message": "ParaSol Backend Running"}
 
 
 @router.post("/rainfall/check")
