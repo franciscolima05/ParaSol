@@ -67,3 +67,25 @@ El proyecto ParaSol presenta una solución robusta y bien estructurada para segu
 [![Demo ParaSol](https://img.youtube.com/vi/TU_VIDEO_ID/maxresdefault.jpg)](https://youtu.be/oulhUzNyWfI)
 
 
+## Próximos Pasos
+
+### Corto plazo
+
+- Conectar el frontend a la API de backend
+- Conectar el frontend a la TESTNET de Avalanche
+- Refactorizar el codigo de frontend 
+- Implementar triggers de eventos en la API de backend 
+- Frontend Responsive
+- Agregar trazabilidad a los smart contracts
+- Curtir el front 
+
+### Mediano plazo
+
+- Definir como se guardaron los datos(geoespacial, user, smart contracts)
+- Optimization de los smart contracts
+- Invesitgar como aplicar al FOUNDRY una vez terminado el proyecto 
+
+### Largo plazo
+
+- Migrar a una subnet Propia 
+
